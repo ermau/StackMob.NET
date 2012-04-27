@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackMob.NET", "Windows Phone\StackMob.NET\StackMob.NET.csproj", "{6FC050CC-B05C-46CB-A66A-C6F18BAD7E5B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Windows Phone", "Windows Phone", "{FD459BD3-2182-4F7C-8E40-5AE241024D7C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mono for Android", "Mono for Android", "{6E6BD158-EB6E-4958-91AD-67DD081916B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackMob.NET", "Mono for Android\StackMob.NET\StackMob.NET.csproj", "{183208F2-6438-4684-83C4-9C4A1A1179F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E381E355-E96F-478C-8687-2994CC903AE3}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FC050CC-B05C-46CB-A66A-C6F18BAD7E5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FC050CC-B05C-46CB-A66A-C6F18BAD7E5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FC050CC-B05C-46CB-A66A-C6F18BAD7E5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FC050CC-B05C-46CB-A66A-C6F18BAD7E5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{183208F2-6438-4684-83C4-9C4A1A1179F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{183208F2-6438-4684-83C4-9C4A1A1179F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{183208F2-6438-4684-83C4-9C4A1A1179F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{183208F2-6438-4684-83C4-9C4A1A1179F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6FC050CC-B05C-46CB-A66A-C6F18BAD7E5B} = {FD459BD3-2182-4F7C-8E40-5AE241024D7C}
+		{183208F2-6438-4684-83C4-9C4A1A1179F3} = {6E6BD158-EB6E-4958-91AD-67DD081916B0}
+	EndGlobalSection
+EndGlobal
