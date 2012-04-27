@@ -59,7 +59,7 @@ namespace StackMob
 
 			var req = GetRequest (type, "POST");
 
-			Execute (req, HttpStatusCode.Created,
+			Execute (req,
 				s => JsonSerializer.SerializeToStream (value, s),
 				s =>
 				{
@@ -82,7 +82,7 @@ namespace StackMob
 				throw new ArgumentNullException ("failure");
 
 			var req = GetRequest (type, "POST", id + "/" + field);
-			Execute (req, HttpStatusCode.OK,
+			Execute (req,
 				s => JsonSerializer.SerializeToStream (items, s),
 				s =>
 				{
@@ -153,7 +153,7 @@ namespace StackMob
 				throw new ArgumentNullException ("failure");
 
 			var req = GetRequest (type, "GET");
-			Execute (req, HttpStatusCode.OK,
+			Execute (req,
 				s =>
 				{
 					var result = JsonSerializer.DeserializeFromStream<IEnumerable<T>> (s);
@@ -172,7 +172,7 @@ namespace StackMob
 				throw new ArgumentNullException ("failure");
 
 			var req = GetRequest (type, "GET", id);
-			Execute (req, HttpStatusCode.OK,
+			Execute (req,
 				s =>
 				{
 					T result = JsonSerializer.DeserializeFromStream<T> (s);
@@ -244,7 +244,7 @@ namespace StackMob
 				throw new ArgumentException ("Can not have an empty type", "type");
 		}
 
-		private void Execute (HttpWebRequest request, HttpStatusCode expected, Action<Stream> success, Action<Exception> failure)
+		private void Execute (HttpWebRequest request, Action<Stream> success, Action<Exception> failure)
 		{
 			try
 			{
@@ -254,27 +254,14 @@ namespace StackMob
 					try
 					{
 						response = (HttpWebResponse) request.EndGetResponse (resResult);
+
+						using (Stream s = response.GetResponseStream())
+							success (s);
 					}
 					catch (Exception ex)
 					{
 						failure (ex);
-						return;
 					}
-
-					if (response.StatusCode == expected)
-					{
-						try
-						{
-							using (Stream s = response.GetResponseStream())
-								success (s);
-						}
-						catch (Exception ex)
-						{
-							failure (ex);
-						}
-					}
-					else
-						failure (new Exception (response.StatusDescription));
 				}, null);
 			}
 			catch (WebException wex)
@@ -283,7 +270,7 @@ namespace StackMob
 			}
 		}
 
-		private void Execute (HttpWebRequest request, HttpStatusCode expected, Action<Stream> send, Action<Stream> success, Action<Exception> failure)
+		private void Execute (HttpWebRequest request, Action<Stream> send, Action<Stream> success, Action<Exception> failure)
 		{
 			try
 			{
@@ -297,7 +284,7 @@ namespace StackMob
 								send (s);
 						}
 
-						Execute (request, expected, success, failure);
+						Execute (request, success, failure);
 					}
 					catch (Exception ex)
 					{
