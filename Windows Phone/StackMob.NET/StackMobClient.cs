@@ -69,6 +69,27 @@ namespace StackMob
 				failure);
 		}
 
+		public void CreateRelated<T> (string type, string id, string field, IEnumerable<T> items, Action<IEnumerable<string>> success, Action<Exception> failure)
+		{
+			CheckType (type);
+			CheckId (id);
+			CheckField (field);
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var req = GetRequest (type, "POST", id + "/" + field);
+			Execute (req, HttpStatusCode.OK,
+				s => JsonSerializer.SerializeToStream (items, s),
+				s =>
+				{
+					JsonObject jobj = JsonSerializer.DeserializeFromStream<JsonObject> (s);
+					success (JsonSerializer.DeserializeFromString<IEnumerable<string>> (jobj ["succeeded"]));
+				},
+				failure);
+		}
+
 		public void Update (string type, string id, IDictionary<string, object> values, Action<IDictionary<string, object>> success, Action<Exception> failure)
 		{
 			Update<IDictionary<string, object>> (type, id, values, success, failure);
