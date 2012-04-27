@@ -74,6 +74,8 @@ namespace StackMob
 			CheckType (type);
 			CheckId (id);
 			CheckField (field);
+			if (items == null)
+				throw new ArgumentNullException ("items");
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
