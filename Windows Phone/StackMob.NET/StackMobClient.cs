@@ -112,6 +112,36 @@ namespace StackMob
 				failure);
 		}
 
+		public void Append<T> (string type, string id, string field, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
+		{
+			AppendCore (type, id, field, values, success, failure);
+		}
+
+		public void Append<T> (string type, string id, string field, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
+		{
+			AppendCore (type, id, field, values, success, failure);
+		}
+
+		public void Append<T> (string type, string id, string field, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
+		{
+			AppendCore (type, id, field, values, success, failure);
+		}
+
+		public void Append<T> (string type, string id, string field, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
+		{
+			AppendCore (type, id, field, values, success, failure);
+		}
+
+		public void Append<T> (string type, string id, string field, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
+		{
+			AppendCore (type, id, field, values, success, failure);
+		}
+
+		public void Append<T> (string type, string id, string field, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
+		{
+			AppendCore (type, id, field, values, success, failure);
+		}
+
 		public void Get<T> (string type, Action<IEnumerable<T>> success, Action<Exception> failure)
 		{
 			CheckType (type);
@@ -168,6 +198,25 @@ namespace StackMob
 		private readonly string apiSecret;
 		private readonly string userObjectName;
 		private readonly string appname;
+
+		private void AppendCore<TValue,TResult> (string type, string id, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
+		{
+			CheckType (type);
+			CheckId (id);
+			CheckField (field);
+			if (values == null)
+				throw new ArgumentNullException ("values");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var req = GetRequest (type, "PUT", id + "/" + field);
+			Execute (req, HttpStatusCode.OK,
+				s => JsonSerializer.SerializeToStream (values, s),
+				s => success (JsonSerializer.DeserializeFromStream<TResult> (s)),
+				failure);
+		}
 
 		private static void CheckField (string field)
 		{
