@@ -51,10 +51,7 @@ namespace StackMob
 
 		public void Create<T> (string type, T value, Action<T> success, Action<Exception> failure)
 		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-			if (type.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty type", "type");
+			CheckType (type);
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -79,14 +76,8 @@ namespace StackMob
 
 		public void Update<T> (string type, string id, T value, Action<T> success, Action<Exception> failure)
 		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-			if (type.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty type", "type");
-			if (id == null)
-				throw new ArgumentNullException ("id");
-			if (id.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty id", "id");
+			CheckType (type);
+			CheckId (id);
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -96,20 +87,13 @@ namespace StackMob
 
 			Execute (req, HttpStatusCode.OK,
 				s => JsonSerializer.SerializeToStream (value, s),
-				s =>
-				{
-					T result = JsonSerializer.DeserializeFromStream<T> (s);
-					success (result);
-				},
+				s => success (JsonSerializer.DeserializeFromStream<T> (s)),
 				failure);
 		}
 
 		public void Get<T> (string type, Action<IEnumerable<T>> success, Action<Exception> failure)
 		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-			if (type.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty type", "type");
+			CheckType (type);
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -127,14 +111,8 @@ namespace StackMob
 
 		public void Get<T> (string type, string id, Action<T> success, Action<Exception> failure)
 		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-			if (type.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty type", "type");
-			if (id == null)
-				throw new ArgumentNullException ("id");
-			if (id.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty id", "id");
+			CheckType (type);
+			CheckId (id);
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -152,14 +130,8 @@ namespace StackMob
 
 		public void Delete (string type, string id, Action success, Action<Exception> failure)
 		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-			if (type.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty type", "type");
-			if (id == null)
-				throw new ArgumentNullException ("id");
-			if (id.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty id", "id");
+			CheckType (type);
+			CheckId (id);
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -175,6 +147,30 @@ namespace StackMob
 		private readonly string apiSecret;
 		private readonly string userObjectName;
 		private readonly string appname;
+
+		private static void CheckField (string field)
+		{
+			if (field == null)
+				throw new ArgumentNullException ("field");
+			if (field.Trim() == String.Empty)
+				throw new ArgumentException ("Can not have an empty field", "field");
+		}
+
+		private static void CheckId (string id)
+		{
+			if (id == null)
+				throw new ArgumentNullException ("id");
+			if (id.Trim() == String.Empty)
+				throw new ArgumentException ("Can not have an empty id", "id");
+		}
+
+		private static void CheckType (string type)
+		{
+			if (type == null)
+				throw new ArgumentNullException ("type");
+			if (type.Trim() == String.Empty)
+				throw new ArgumentException ("Can not have an empty type", "type");
+		}
 
 		private void Execute (HttpWebRequest request, HttpStatusCode expected, Action<Stream> success, Action<Exception> failure)
 		{
