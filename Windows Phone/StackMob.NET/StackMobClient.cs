@@ -108,7 +108,7 @@ namespace StackMob
 
 			var req = GetRequest (type, "PUT", id);
 
-			Execute (req, HttpStatusCode.OK,
+			Execute (req,
 				s => JsonSerializer.SerializeToStream (value, s),
 				s => success (JsonSerializer.DeserializeFromStream<T> (s)),
 				failure);
@@ -271,8 +271,8 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "PUT", id + "/" + field);
-			Execute (req, HttpStatusCode.OK,
+			var req = GetRequest (type, "PUT", parentId + "/" + field);
+			Execute (req,
 				s => JsonSerializer.SerializeToStream (values, s),
 				s => success (JsonSerializer.DeserializeFromStream<TResult> (s)),
 				failure);
