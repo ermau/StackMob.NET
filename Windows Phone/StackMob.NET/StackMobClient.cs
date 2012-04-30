@@ -114,34 +114,34 @@ namespace StackMob
 				failure);
 		}
 
-		public void Append<T> (string type, string id, string field, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string type, string parentId, string field, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, id, field, values, success, failure);
+			AppendCore (type, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string id, string field, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string type, string parentId, string field, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, id, field, values, success, failure);
+			AppendCore (type, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string id, string field, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string type, string parentId, string field, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, id, field, values, success, failure);
+			AppendCore (type, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string id, string field, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string type, string parentId, string field, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, id, field, values, success, failure);
+			AppendCore (type, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string id, string field, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string type, string parentId, string field, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, id, field, values, success, failure);
+			AppendCore (type, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string id, string field, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string type, string parentId, string field, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, id, field, values, success, failure);
+			AppendCore (type, parentId, field, values, success, failure);
 		}
 
 		public void Get<T> (string type, Action<IEnumerable<T>> success, Action<Exception> failure)
