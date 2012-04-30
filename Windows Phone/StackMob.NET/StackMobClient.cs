@@ -343,12 +343,12 @@ namespace StackMob
 				throw new ArgumentException ("Can not have an empty field", "field");
 		}
 
-		private static void CheckId (string id)
+		private static void CheckId (string id, string name = "id")
 		{
 			if (id == null)
-				throw new ArgumentNullException ("id");
+				throw new ArgumentNullException (name);
 			if (id.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty id", "id");
+				throw new ArgumentException ("Can not have an empty " + name, name);
 		}
 
 		private static void CheckType (string type)
