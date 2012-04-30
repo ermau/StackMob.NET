@@ -18,8 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using OAuth;
 using ServiceStack.Text;
 
@@ -86,8 +88,34 @@ namespace StackMob
 				s => JsonSerializer.SerializeToStream (items, s),
 				s =>
 				{
-					JsonObject jobj = JsonSerializer.DeserializeFromStream<JsonObject> (s);
-					success (JsonSerializer.DeserializeFromString<IEnumerable<string>> (jobj ["succeeded"]));
+					string contents;
+					using (StreamReader reader = new StreamReader (s))
+						contents = reader.ReadToEnd();
+
+					JsonObject jobj = JsonSerializer.DeserializeFromString<JsonObject> (contents);
+
+					IEnumerable<string> ids;
+
+					if (jobj.ContainsKey ("succeeded"))
+						ids = JsonSerializer.DeserializeFromString<IEnumerable<string>> (jobj["succeeded"]);
+					else
+					{
+						JsonObject apis = GetApis();
+						if (!apis.ContainsKey (type))
+							throw new Exception ("API not found for " + type);
+
+						string refType = apis.Object (type).Object ("properties").Object (field)["$ref"];
+
+						JsonObject properties = apis.Object (refType).Object ("properties");
+
+						string primaryKey = FindIdentityColumn (properties);
+						if (primaryKey == null)
+							throw new Exception ("Primary key not found for " + type);
+
+						ids = new[] { jobj [primaryKey] };
+					}
+
+					success (ids);
 				},
 				failure);
 		}
@@ -231,6 +259,35 @@ namespace StackMob
 		private readonly string userObjectName;
 		private readonly string appname;
 
+		private JsonObject GetApis ()
+		{
+			ManualResetEvent mre = new ManualResetEvent (false);
+
+			JsonObject api = null;
+			Exception error = null;
+
+			var req = GetRequest ("listapi", "GET");
+			Execute (req,
+				s =>
+				{
+					api = JsonSerializer.DeserializeFromStream<JsonObject> (s);
+					mre.Set();
+				},
+				
+				ex =>
+				{
+					error = ex;
+					mre.Set();
+				});
+
+			mre.WaitOne();
+
+			if (error != null)
+				throw error;
+
+			return api;
+		}
+
 		private void DeleteFromCore<TValue, TResult> (string type, string parentId, string field, bool cascade, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
 		{
 			CheckType (type);
@@ -300,6 +357,24 @@ namespace StackMob
 				throw new ArgumentNullException ("type");
 			if (type.Trim() == String.Empty)
 				throw new ArgumentException ("Can not have an empty type", "type");
+		}
+
+		private static string FindIdentityColumn (JsonObject properties)
+		{
+			string primaryKey = null;
+			foreach (string key in properties.Keys)
+			{
+				JsonObject column = properties.Object (key);
+
+				string value;
+				if (column.TryGetValue ("identity", out value) && value.ToLower() == "true")
+				{
+					primaryKey = key;
+					break;
+				}
+			}
+
+			return primaryKey;
 		}
 
 		private void Execute (HttpWebRequest request, Action<Stream> success, Action<Exception> failure)
