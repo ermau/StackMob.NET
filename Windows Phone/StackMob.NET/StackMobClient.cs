@@ -71,9 +71,9 @@ namespace StackMob
 				failure);
 		}
 
-		public void CreateRelated<T> (string type, string parentId, string field, IEnumerable<T> items, Action<IEnumerable<string>> success, Action<Exception> failure)
+		public void CreateRelated<T> (string parentType, string parentId, string field, IEnumerable<T> items, Action<IEnumerable<string>> success, Action<Exception> failure)
 		{
-			CheckType (type);
+			CheckType (parentType, "parentType");
 			CheckId (parentId, "parentId");
 			CheckField (field);
 			if (items == null)
@@ -83,7 +83,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "POST", parentId + "/" + field);
+			var req = GetRequest (parentType, "POST", parentId + "/" + field);
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (items, s),
 				s =>
@@ -101,16 +101,16 @@ namespace StackMob
 					else
 					{
 						JsonObject apis = GetApis();
-						if (!apis.ContainsKey (type))
-							throw new Exception ("API not found for " + type);
+						if (!apis.ContainsKey (parentType))
+							throw new Exception ("API not found for " + parentType);
 
-						string refType = apis.Object (type).Object ("properties").Object (field)["$ref"];
+						string refType = apis.Object (parentType).Object ("properties").Object (field)["$ref"];
 
 						JsonObject properties = apis.Object (refType).Object ("properties");
 
 						string primaryKey = FindIdentityColumn (properties);
 						if (primaryKey == null)
-							throw new Exception ("Primary key not found for " + type);
+							throw new Exception ("Primary key not found for " + parentType);
 
 						ids = new[] { jobj [primaryKey] };
 					}
@@ -142,34 +142,34 @@ namespace StackMob
 				failure);
 		}
 
-		public void Append<T> (string type, string parentId, string field, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string parentType, string parentId, string field, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, parentId, field, values, success, failure);
+			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string parentId, string field, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string parentType, string parentId, string field, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, parentId, field, values, success, failure);
+			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string parentId, string field, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string parentType, string parentId, string field, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, parentId, field, values, success, failure);
+			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string parentId, string field, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string parentType, string parentId, string field, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, parentId, field, values, success, failure);
+			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string parentId, string field, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string parentType, string parentId, string field, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, parentId, field, values, success, failure);
+			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void Append<T> (string type, string parentId, string field, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
+		public void Append<T> (string parentType, string parentId, string field, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
 		{
-			AppendCore (type, parentId, field, values, success, failure);
+			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
 		public void Get<T> (string type, Action<IEnumerable<T>> success, Action<Exception> failure)
@@ -316,9 +316,9 @@ namespace StackMob
 				failure);
 		}
 
-		private void AppendCore<TValue,TResult> (string type, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
+		private void AppendCore<TValue,TResult> (string parentType, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
 		{
-			CheckType (type);
+			CheckType (parentType, "parentType");
 			CheckId (parentId, "parentId");
 			CheckField (field);
 			if (values == null)
@@ -328,7 +328,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "PUT", parentId + "/" + field);
+			var req = GetRequest (parentType, "PUT", parentId + "/" + field);
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (values, s),
 				s => success (JsonSerializer.DeserializeFromStream<TResult> (s)),
@@ -351,12 +351,12 @@ namespace StackMob
 				throw new ArgumentException ("Can not have an empty " + name, name);
 		}
 
-		private static void CheckType (string type)
+		private static void CheckType (string type, string name = "type")
 		{
 			if (type == null)
-				throw new ArgumentNullException ("type");
+				throw new ArgumentNullException (name);
 			if (type.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty type", "type");
+				throw new ArgumentException ("Can not have an empty " + name, name);
 		}
 
 		private static string FindIdentityColumn (JsonObject properties)
