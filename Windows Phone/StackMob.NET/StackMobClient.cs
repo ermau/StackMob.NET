@@ -191,7 +191,37 @@ namespace StackMob
 				throw new ArgumentNullException ("failure");
 
 			var req = GetRequest (type, "DELETE", id);
-			Execute (req, HttpStatusCode.OK, s => success(), failure);
+			Execute (req, s => success(), failure);
+		}
+
+		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
+		{
+			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+		}
+
+		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
+		{
+			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+		}
+
+		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
+		{
+			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+		}
+
+		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
+		{
+			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+		}
+
+		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
+		{
+			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+		}
+
+		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
+		{
+			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
 		}
 
 		private readonly string accepts;
@@ -201,10 +231,38 @@ namespace StackMob
 		private readonly string userObjectName;
 		private readonly string appname;
 
-		private void AppendCore<TValue,TResult> (string type, string id, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
+		private void DeleteFromCore<TValue, TResult> (string type, string parentId, string field, bool cascade, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
 		{
 			CheckType (type);
-			CheckId (id);
+			CheckId (parentId, "parentId");
+			CheckField (field);
+			if (values == null)
+				throw new ArgumentNullException ("values");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			StringBuilder ids = new StringBuilder();
+			foreach (TValue value in values)
+			{
+				if (value != null)
+					ids.Append (value.ToString());
+			}
+
+			var req = GetRequest (type, "DELETE", parentId + "/" + ids);
+			if (cascade)
+				req.Headers["X-StackMob-CascadeDelete"] = "true";
+
+			Execute (req,
+				s => success (JsonSerializer.DeserializeFromStream<TResult> (s)),
+				failure);
+		}
+
+		private void AppendCore<TValue,TResult> (string type, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
+		{
+			CheckType (type);
+			CheckId (parentId, "parentId");
 			CheckField (field);
 			if (values == null)
 				throw new ArgumentNullException ("values");
