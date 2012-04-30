@@ -71,10 +71,10 @@ namespace StackMob
 				failure);
 		}
 
-		public void CreateRelated<T> (string type, string id, string field, IEnumerable<T> items, Action<IEnumerable<string>> success, Action<Exception> failure)
+		public void CreateRelated<T> (string type, string parentId, string field, IEnumerable<T> items, Action<IEnumerable<string>> success, Action<Exception> failure)
 		{
 			CheckType (type);
-			CheckId (id);
+			CheckId (parentId, "parentId");
 			CheckField (field);
 			if (items == null)
 				throw new ArgumentNullException ("items");
@@ -83,7 +83,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "POST", id + "/" + field);
+			var req = GetRequest (type, "POST", parentId + "/" + field);
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (items, s),
 				s =>
