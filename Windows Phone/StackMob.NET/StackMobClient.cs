@@ -27,6 +27,9 @@ using ServiceStack.Text;
 
 namespace StackMob
 {
+	/// <summary>
+	/// A class providing a client interface to the StackMob.com APIs.
+	/// </summary>
 	public class StackMobClient
 	{
 		public StackMobClient (string apiKey, string apiSecret, string appname, int apiVersion, string userObjectName = "user")
@@ -46,11 +49,35 @@ namespace StackMob
 			this.accepts = "application/vnd.stackmob+json; version=" + apiVersion;
 		}
 
+		/// <summary>
+		/// Create an object with a set of keys and values.
+		/// </summary>
+		/// <param name="type">The type of object (the schema) to create.</param>
+		/// <param name="values">A dictionary of columns and values.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="values"/>, <paramref name="success"/>
+		///  or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException"><paramref name="type"/> is an empty string.</exception>
 		public void Create (string type, IDictionary<string, object> values, Action<IDictionary<string, object>> success, Action<Exception> failure)
 		{
 			Create<IDictionary<string, object>> (type, values, success, failure);
 		}
 
+		/// <summary>
+		/// Creates an object of parentType <typeparamref name="T"/>.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to create.</typeparam>
+		/// <param name="type">The name of the schema the parentType is stored in.</param>
+		/// <param name="value">The object to store.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="success"/> or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException"><paramref name="type"/> is an empty string.</exception>
 		public void Create<T> (string type, T value, Action<T> success, Action<Exception> failure)
 		{
 			CheckType (type);
@@ -71,6 +98,28 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Creates objects of parentType <typeparamref name="T"/> in relation to <paramref name="parentId"/>.
+		/// </summary>
+		/// <typeparam name="T">The parentType of objects to create.</typeparam>
+		/// <param name="parentType">The parentType (schema) of the parent parentType.</param>
+		/// <param name="parentId">The id of the parent object.</param>
+		/// <param name="field">The relationship or array field.</param>
+		/// <param name="items">The items to create.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="field"/>,
+		/// <paramref name="items"/>, <paramref name="success"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <para>
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> or <paramref name="field"/>
+		/// are empty strings.
+		/// </para>
+		/// </exception>
 		public void CreateRelated<T> (string parentType, string parentId, string field, IEnumerable<T> items, Action<IEnumerable<string>> success, Action<Exception> failure)
 		{
 			CheckType (parentType, "parentType");
@@ -120,11 +169,46 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Updates an existing object with the given column/value dictionary.
+		/// </summary>
+		/// <param name="type">The parentType (schema) of object to update.</param>
+		/// <param name="id">The id of the object to update.</param>
+		/// <param name="values">A dictionary of columns to values.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="type" />, <paramref name="id"/>, <paramref name="values"/>,
+		/// <paramref name="success"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/>, <paramref name="id"/> are empty strings.
+		/// </exception>
 		public void Update (string type, string id, IDictionary<string, object> values, Action<IDictionary<string, object>> success, Action<Exception> failure)
 		{
 			Update<IDictionary<string, object>> (type, id, values, success, failure);
 		}
 
+		/// <summary>
+		/// Updates an existing object.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to update.</typeparam>
+		/// <param name="type">The parentType (schema) of object to update.</param>
+		/// <param name="id">The id of the object to update.</param>
+		/// <param name="value">The latest representation of the object.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="type" />, <paramref name="id"/>, <paramref name="success"/>
+		/// or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/>, <paramref name="id"/> are empty strings.
+		/// </exception>
 		public void Update<T> (string type, string id, T value, Action<T> success, Action<Exception> failure)
 		{
 			CheckType (type);
@@ -142,36 +226,163 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Appends <paramref name="values"/> to an array <paramref name="field"/> of an existing object.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to update.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) to update.</param>
+		/// <param name="parentId">The id of the parent object to update.</param>
+		/// <param name="field">The array field.</param>
+		/// <param name="values">The values to append.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="success"/>,
+		/// <paramref name="values"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> are empty strings.
+		/// </exception>
 		public void Append<T> (string parentType, string parentId, string field, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
 		{
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Appends <paramref name="values"/> to an array <paramref name="field"/> of an existing object.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to update.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) to update.</param>
+		/// <param name="parentId">The id of the parent object to update.</param>
+		/// <param name="field">The array field.</param>
+		/// <param name="values">The values to append.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="success"/>,
+		/// <paramref name="values"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> are empty strings.
+		/// </exception>
 		public void Append<T> (string parentType, string parentId, string field, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
 		{
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Appends <paramref name="values"/> to an array <paramref name="field"/> of an existing object.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to update.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) to update.</param>
+		/// <param name="parentId">The id of the parent object to update.</param>
+		/// <param name="field">The array field.</param>
+		/// <param name="values">The values to append.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="success"/>,
+		/// <paramref name="values"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> are empty strings.
+		/// </exception>
 		public void Append<T> (string parentType, string parentId, string field, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
 		{
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Appends <paramref name="values"/> to an array <paramref name="field"/> of an existing object.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to update.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) to update.</param>
+		/// <param name="parentId">The id of the parent object to update.</param>
+		/// <param name="field">The array field.</param>
+		/// <param name="values">The values to append.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="success"/>,
+		/// <paramref name="values"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> are empty strings.
+		/// </exception>
 		public void Append<T> (string parentType, string parentId, string field, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
 		{
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Appends <paramref name="values"/> to an array <paramref name="field"/> of an existing object.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to update.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) to update.</param>
+		/// <param name="parentId">The id of the parent object to update.</param>
+		/// <param name="field">The array field.</param>
+		/// <param name="values">The values to append.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="success"/>,
+		/// <paramref name="values"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> are empty strings.
+		/// </exception>
 		public void Append<T> (string parentType, string parentId, string field, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
 		{
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Appends <paramref name="values"/> to an array <paramref name="field"/> of an existing object.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to update.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) to update.</param>
+		/// <param name="parentId">The id of the parent object to update.</param>
+		/// <param name="field">The array field.</param>
+		/// <param name="values">The values to append.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="success"/>,
+		/// <paramref name="values"/> or <paramref name="failure"/> are <c>null</c>.
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> are empty strings.
+		/// </exception>
 		public void Append<T> (string parentType, string parentId, string field, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
 		{
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Gets all objects of the given <paramref name="type"/>.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to retrieve.</typeparam>
+		/// <param name="type">The parentType name (schema) to retrieve.</param>
+		/// <param name="success">A callback on success, returning a list of objects.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/> is an empty string.
+		/// </exception>
 		public void Get<T> (string type, Action<IEnumerable<T>> success, Action<Exception> failure)
 		{
 			CheckType (type);
@@ -190,6 +401,21 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Gets the object with the given <paramref name="id"/>.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to retrieve.</typeparam>
+		/// <param name="type">The parentType name (schema) of the object to retrieve.</param>
+		/// <param name="id">The id of the object to retrieve.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="id"/>, <paramref name="success"/>,
+		/// or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/> or <paramref name="id"/> are empty strings.
+		/// </exception>
 		public void Get<T> (string type, string id, Action<T> success, Action<Exception> failure)
 		{
 			CheckType (type);
@@ -209,6 +435,20 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Deletes an object with the given id.
+		/// </summary>
+		/// <param name="type">The parentType name (schema) of the object to delete.</param>
+		/// <param name="id">The id of the object to delete.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="id"/>, <paramref name="success"/>,
+		/// or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/> or <paramref name="id"/> are empty strings.
+		/// </exception>
 		public void Delete (string type, string id, Action success, Action<Exception> failure)
 		{
 			CheckType (type);
@@ -222,34 +462,137 @@ namespace StackMob
 			Execute (req, s => success(), failure);
 		}
 
-		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<string> values, Action<T> success, Action<Exception> failure)
+		/// <summary>
+		/// Deletes an element from an array field.
+		/// </summary>
+		/// <typeparam name="T">The parentType of the parent object.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) of the object to delete from.</param>
+		/// <param name="parentId">The id of the parent object to delete from.</param>
+		/// <param name="field">The array field name.</param>
+		/// <param name="values">The values to delete from the <paramref name="field"/>.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <param name="cascade">Whether to cascade deletes or not (when <paramref name="values"/> contains IDs).</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="field"/>, <paramref name="values"/>
+		/// <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void DeleteFrom<T> (string parentType, string parentId, string field, IEnumerable<string> values, Action<T> success, Action<Exception> failure, bool cascade = false)
 		{
-			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+			DeleteFromCore (parentType, parentId, field, values, success, failure, cascade);
 		}
 
-		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
+		/// <summary>
+		/// Deletes an element from an array field.
+		/// </summary>
+		/// <typeparam name="T">The parentType of the parent object.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) of the object to delete from.</param>
+		/// <param name="parentId">The id of the parent object to delete from.</param>
+		/// <param name="field">The array field name.</param>
+		/// <param name="values">The values to delete from the <paramref name="field"/>.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="field"/>, <paramref name="values"/>
+		/// <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void DeleteFrom<T> (string parentType, string parentId, string field, IEnumerable<int> values, Action<T> success, Action<Exception> failure)
 		{
-			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+			DeleteFromCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
+		/// <summary>
+		/// Deletes an element from an array field.
+		/// </summary>
+		/// <typeparam name="T">The parentType of the parent object.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) of the object to delete from.</param>
+		/// <param name="parentId">The id of the parent object to delete from.</param>
+		/// <param name="field">The array field name.</param>
+		/// <param name="values">The values to delete from the <paramref name="field"/>.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="field"/>, <paramref name="values"/>
+		/// <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void DeleteFrom<T> (string parentType, string parentId, string field, IEnumerable<long> values, Action<T> success, Action<Exception> failure)
 		{
-			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+			DeleteFromCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
+		/// <summary>
+		/// Deletes an element from an array field.
+		/// </summary>
+		/// <typeparam name="T">The parentType of the parent object.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) of the object to delete from.</param>
+		/// <param name="parentId">The id of the parent object to delete from.</param>
+		/// <param name="field">The array field name.</param>
+		/// <param name="values">The values to delete from the <paramref name="field"/>.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="field"/>, <paramref name="values"/>
+		/// <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void DeleteFrom<T> (string parentType, string parentId, string field, IEnumerable<float> values, Action<T> success, Action<Exception> failure)
 		{
-			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+			DeleteFromCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
+		/// <summary>
+		/// Deletes an element from an array field.
+		/// </summary>
+		/// <typeparam name="T">The parentType of the parent object.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) of the object to delete from.</param>
+		/// <param name="parentId">The id of the parent object to delete from.</param>
+		/// <param name="field">The array field name.</param>
+		/// <param name="values">The values to delete from the <paramref name="field"/>.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="field"/>, <paramref name="values"/>
+		/// <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void DeleteFrom<T> (string parentType, string parentId, string field, IEnumerable<double> values, Action<T> success, Action<Exception> failure)
 		{
-			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+			DeleteFromCore (parentType, parentId, field, values, success, failure);
 		}
 
-		public void DeleteFrom<T> (string type, string parentId, string field, bool cascade, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
+		/// <summary>
+		/// Deletes an element from an array field.
+		/// </summary>
+		/// <typeparam name="T">The parentType of the parent object.</typeparam>
+		/// <param name="parentType">The parent parentType (schema) of the object to delete from.</param>
+		/// <param name="parentId">The id of the parent object to delete from.</param>
+		/// <param name="field">The array field name.</param>
+		/// <param name="values">The values to delete from the <paramref name="field"/>.</param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="parentType" />, <paramref name="parentId"/>, <paramref name="field"/>, <paramref name="values"/>
+		/// <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="parentType"/>, <paramref name="parentId"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void DeleteFrom<T> (string parentType, string parentId, string field, IEnumerable<bool> values, Action<T> success, Action<Exception> failure)
 		{
-			DeleteFromCore (type, parentId, field, cascade, values, success, failure);
+			DeleteFromCore (parentType, parentId, field, values, success, failure);
 		}
 
 		private readonly string accepts;
@@ -288,9 +631,9 @@ namespace StackMob
 			return api;
 		}
 
-		private void DeleteFromCore<TValue, TResult> (string type, string parentId, string field, bool cascade, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
+		private void DeleteFromCore<TValue, TResult> (string parentType, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure, bool cascade = false)
 		{
-			CheckType (type);
+			CheckType (parentType, "parentType");
 			CheckId (parentId, "parentId");
 			CheckField (field);
 			if (values == null)
@@ -307,7 +650,7 @@ namespace StackMob
 					ids.Append (value.ToString());
 			}
 
-			var req = GetRequest (type, "DELETE", parentId + "/" + ids);
+			var req = GetRequest (parentType, "DELETE", parentId + "/" + ids);
 			if (cascade)
 				req.Headers["X-StackMob-CascadeDelete"] = "true";
 
