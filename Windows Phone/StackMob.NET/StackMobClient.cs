@@ -143,28 +143,14 @@ namespace StackMob
 
 					JsonObject jobj = JsonSerializer.DeserializeFromString<JsonObject> (contents);
 
-					IEnumerable<string> ids;
-
 					if (jobj.ContainsKey ("succeeded"))
-						ids = JsonSerializer.DeserializeFromString<IEnumerable<string>> (jobj["succeeded"]);
+						success (JsonSerializer.DeserializeFromString<IEnumerable<string>> (jobj["succeeded"]));
 					else
 					{
-						JsonObject apis = GetApis();
-						if (!apis.ContainsKey (parentType))
-							throw new Exception ("API not found for " + parentType);
-
-						string refType = apis.Object (parentType).Object ("properties").Object (field)["$ref"];
-
-						JsonObject properties = apis.Object (refType).Object ("properties");
-
-						string primaryKey = FindIdentityColumn (properties);
-						if (primaryKey == null)
-							throw new Exception ("Primary key not found for " + parentType);
-
-						ids = new[] { jobj [primaryKey] };
+						GetPrimaryKey (parentType, field,
+							key => success (new[] { jobj [key] }),
+							failure);
 					}
-
-					success (ids);
 				},
 				failure);
 		}
@@ -595,6 +581,134 @@ namespace StackMob
 			DeleteFromCore (parentType, parentId, field, values, success, failure);
 		}
 
+		public void CreateUserWithFacebook (string username, string facebookAccessToken, Action success, Action<Exception> failure)
+		{
+			CheckArgument (username, "username");
+			CheckArgument (facebookAccessToken, "facebookAccessToken");
+
+			var args = new Dictionary<string, string>();
+			args["username"] = username;
+			args["fb_at"] = facebookAccessToken;
+
+			var req = GetRequest (this.userObjectName + "/createUserWithFacebook", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
+		public void CreateUserWithTwitter (string username, string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
+		{
+			CheckArgument (username, "username");
+			CheckArgument (twitterToken, "twitterToken");
+			CheckArgument (twitterSecret, "twitterSecret");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var args = new Dictionary<string, string>();
+			args["tw_tk"] = twitterToken;
+			args["tw_ts"] = twitterSecret;
+
+			var req = GetRequest (this.userObjectName + "/createuserWithTwitter", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
+		public void LoginWithTwitter (string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
+		{
+			CheckArgument (twitterToken, "twitterToken");
+			CheckArgument (twitterSecret, "twitterSecret");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var args = new Dictionary<string, string>();
+			args["tw_tk"] = twitterToken;
+			args["tw_ts"] = twitterSecret;
+
+			var req = GetRequest (this.userObjectName + "/twitterLogin", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
+		/// <remarks>Requires being logged to a StackMob account.</remarks>
+		public void LinkAccountToTwitter (string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
+		{
+			CheckArgument (twitterToken, "twitterToken");
+			CheckArgument (twitterSecret, "twitterSecret");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var args = new Dictionary<string, string>();
+			args["tw_tk"] = twitterToken;
+			args["tw_ts"] = twitterSecret;
+
+			var req = GetRequest (this.userObjectName + "/linkUserWithTwitter", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
+		public void Tweet (string contents, Action success, Action<Exception> failure)
+		{
+			CheckArgument (contents, "contents");
+
+			var args = new Dictionary<string, string>();
+			args ["tw_st"] = contents;
+
+			var req = GetRequest (this.userObjectName + "/twitterStatusUpdate", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
+		public void Login (IDictionary<string, string> arguments, Action success, Action<Exception> failure)
+		{
+		    if (arguments == null)
+		        throw new ArgumentNullException ("arguments");
+
+			GetPrimaryKey (this.userObjectName,
+				key =>
+				{
+					this.usernameField = key;
+					this.username = arguments [key];
+
+					var req = GetRequest (this.userObjectName + "/login", "GET", query: GetQueryForArguments (arguments));
+					Execute (req,
+						s => success(),
+						failure);
+				},
+
+				failure);
+		}
+
+		public void Logout (Action success, Action<Exception> failure)
+		{
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+			if (this.usernameField == null)
+				throw new InvalidOperationException ("Have not previously logged in");
+
+			var args = new Dictionary<string, string>();
+			args[this.usernameField] = this.username;
+
+			var req = GetRequest (this.userObjectName + "/logout", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
+		private string usernameField;
+		private string username;
+
 		private readonly string accepts;
 
 		private readonly string apiKey;
@@ -602,33 +716,12 @@ namespace StackMob
 		private readonly string userObjectName;
 		private readonly string appname;
 
-		private JsonObject GetApis ()
+		private void GetApis (Action<JsonObject> success, Action<Exception> failure)
 		{
-			ManualResetEvent mre = new ManualResetEvent (false);
-
-			JsonObject api = null;
-			Exception error = null;
-
 			var req = GetRequest ("listapi", "GET");
 			Execute (req,
-				s =>
-				{
-					api = JsonSerializer.DeserializeFromStream<JsonObject> (s);
-					mre.Set();
-				},
-				
-				ex =>
-				{
-					error = ex;
-					mre.Set();
-				});
-
-			mre.WaitOne();
-
-			if (error != null)
-				throw error;
-
-			return api;
+				s => success (JsonSerializer.DeserializeFromStream<JsonObject> (s)),
+				failure);
 		}
 
 		private void DeleteFromCore<TValue, TResult> (string parentType, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure, bool cascade = false)
@@ -702,6 +795,49 @@ namespace StackMob
 			}
 
 			return primaryKey;
+		}
+
+		private void GetPrimaryKey (string type, Action<string> success, Action<Exception> failure)
+		{
+			GetPrimaryKey (type, null, success, failure);
+		}
+
+		private void GetPrimaryKey (string type, string field, Action<string> success, Action<Exception> failure)
+		{
+			GetApis (apis =>
+			{
+				if (!apis.ContainsKey (type))
+					throw new Exception ("API not found for " + type);
+
+				JsonObject properties = apis.Object (type).Object ("properties");
+				if (field != null)
+				{
+					string refType = properties.Object (field) ["$ref"];
+					properties = apis.Object (refType).Object ("properties");
+				}
+
+				string primaryKey = FindIdentityColumn (properties);
+				if (primaryKey == null)
+					failure (new Exception ("Primary key not found for " + type));
+
+				success (primaryKey);
+			}, failure);
+		}
+
+		private string GetQueryForArguments (IEnumerable<KeyValuePair<string, string>> arguments)
+		{
+			StringBuilder builder = new StringBuilder();
+			foreach (var arg in arguments)
+			{
+				if (builder.Length > 0)
+					builder.Append ("&");
+
+				builder.Append (Uri.EscapeUriString (arg.Key));
+				builder.Append ("=");
+				builder.Append (Uri.EscapeUriString (arg.Value));
+			}
+
+			return builder.ToString();
 		}
 
 		private void Execute (HttpWebRequest request, Action<Stream> success, Action<Exception> failure)
