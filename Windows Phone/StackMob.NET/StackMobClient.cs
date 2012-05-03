@@ -419,6 +419,31 @@ namespace StackMob
 				failure);
 		}
 
+		public void Get<T> (string type, IDictionary<string, string> filters, Action<IEnumerable<T>> success, Action<Exception> failure)
+		{
+			CheckArgument (type, "type");
+			if (filters == null)
+				throw new ArgumentNullException ("filters");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var req = GetRequest (type, "GET", query: GetQueryForArguments (filters));
+			Execute (req,
+				s =>
+				{
+					IEnumerable<T> result = JsonSerializer.DeserializeFromStream<IEnumerable<T>> (s);
+					success (result);
+				},
+				failure);
+		}
+
+		public void Get (string type, IDictionary<string, string> filters, Action<IEnumerable<IDictionary<string, object>>> success, Action<Exception> failure)
+		{
+			Get<IDictionary<string, object>> (type, filters, success, failure);
+		}
+
 		/// <summary>
 		/// Deletes an object with the given id.
 		/// </summary>
