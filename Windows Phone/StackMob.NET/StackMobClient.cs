@@ -48,6 +48,22 @@ namespace StackMob
 		}
 
 		/// <summary>
+		/// Gets whether there is a user logged in or not.
+		/// </summary>
+		public bool IsLoggedIn
+		{
+			get { return (DateTime.Now.Subtract (this.loginTime) < TimeSpan.FromMinutes (30)); }
+		}
+
+		/// <summary>
+		/// Gets the username of the currently logged in user.
+		/// </summary>
+		public string LoggedInUser
+		{
+			get { return this.loginUsername; }
+		}
+
+		/// <summary>
 		/// Create an object with a set of keys and values.
 		/// </summary>
 		/// <param name="type">The type of object (the schema) to create.</param>
@@ -701,15 +717,21 @@ namespace StackMob
 		    if (arguments == null)
 		        throw new ArgumentNullException ("arguments");
 
+			this.loginUsername = null;
+
 			GetPrimaryKey (this.userObjectName,
 				key =>
 				{
 					this.usernameField = key;
-					this.loginUsername = arguments [key];
-
+					
 					var req = GetRequest (this.userObjectName + "/login", "GET", query: GetQueryForArguments (arguments));
 					Execute (req,
-						s => success(),
+						s =>
+						{
+							this.loginUsername = arguments [key];
+							this.loginTime = DateTime.Now;
+							success();
+						},
 						failure);
 				},
 
@@ -727,6 +749,8 @@ namespace StackMob
 
 			var args = new Dictionary<string, string>();
 			args[this.usernameField] = this.loginUsername;
+			this.loginUsername = null;
+			this.loginTime = default(DateTime);
 
 			var req = GetRequest (this.userObjectName + "/logout", "GET", query: GetQueryForArguments (args));
 			Execute (req,
@@ -734,6 +758,7 @@ namespace StackMob
 				failure);
 		}
 
+		private DateTime loginTime;
 		private string usernameField;
 		private string loginUsername;
 
