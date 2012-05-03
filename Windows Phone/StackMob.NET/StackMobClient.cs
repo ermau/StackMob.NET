@@ -677,7 +677,7 @@ namespace StackMob
 				key =>
 				{
 					this.usernameField = key;
-					this.username = arguments [key];
+					this.loginUsername = arguments [key];
 
 					var req = GetRequest (this.userObjectName + "/login", "GET", query: GetQueryForArguments (arguments));
 					Execute (req,
@@ -698,7 +698,7 @@ namespace StackMob
 				throw new InvalidOperationException ("Have not previously logged in");
 
 			var args = new Dictionary<string, string>();
-			args[this.usernameField] = this.username;
+			args[this.usernameField] = this.loginUsername;
 
 			var req = GetRequest (this.userObjectName + "/logout", "GET", query: GetQueryForArguments (args));
 			Execute (req,
@@ -707,7 +707,7 @@ namespace StackMob
 		}
 
 		private string usernameField;
-		private string username;
+		private string loginUsername;
 
 		private readonly string accepts;
 
