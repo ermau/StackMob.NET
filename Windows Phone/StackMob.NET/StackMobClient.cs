@@ -80,7 +80,7 @@ namespace StackMob
 		/// <exception cref="ArgumentException"><paramref name="type"/> is an empty string.</exception>
 		public void Create<T> (string type, T value, Action<T> success, Action<Exception> failure)
 		{
-			CheckType (type);
+			CheckArgument (type, "type");
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -122,9 +122,9 @@ namespace StackMob
 		/// </exception>
 		public void CreateRelated<T> (string parentType, string parentId, string field, IEnumerable<T> items, Action<IEnumerable<string>> success, Action<Exception> failure)
 		{
-			CheckType (parentType, "parentType");
-			CheckId (parentId, "parentId");
-			CheckField (field);
+			CheckArgument (parentType, "parentType");
+			CheckArgument (parentId, "parentId");
+			CheckArgument (field, "field");
 			if (items == null)
 				throw new ArgumentNullException ("items");
 			if (success == null)
@@ -211,8 +211,8 @@ namespace StackMob
 		/// </exception>
 		public void Update<T> (string type, string id, T value, Action<T> success, Action<Exception> failure)
 		{
-			CheckType (type);
-			CheckId (id);
+			CheckArgument (type, "type");
+			CheckArgument (id, "id");
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -385,7 +385,7 @@ namespace StackMob
 		/// </exception>
 		public void Get<T> (string type, Action<IEnumerable<T>> success, Action<Exception> failure)
 		{
-			CheckType (type);
+			CheckArgument (type, "type");
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -418,8 +418,8 @@ namespace StackMob
 		/// </exception>
 		public void Get<T> (string type, string id, Action<T> success, Action<Exception> failure)
 		{
-			CheckType (type);
-			CheckId (id);
+			CheckArgument (type, "type");
+			CheckArgument (id, "id");
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -451,8 +451,8 @@ namespace StackMob
 		/// </exception>
 		public void Delete (string type, string id, Action success, Action<Exception> failure)
 		{
-			CheckType (type);
-			CheckId (id);
+			CheckArgument (type, "type");
+			CheckArgument (id, "id");
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
@@ -633,9 +633,9 @@ namespace StackMob
 
 		private void DeleteFromCore<TValue, TResult> (string parentType, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure, bool cascade = false)
 		{
-			CheckType (parentType, "parentType");
-			CheckId (parentId, "parentId");
-			CheckField (field);
+			CheckArgument (parentType, "parentType");
+			CheckArgument (parentId, "parentId");
+			CheckArgument (field, "field");
 			if (values == null)
 				throw new ArgumentNullException ("values");
 			if (success == null)
@@ -661,9 +661,9 @@ namespace StackMob
 
 		private void AppendCore<TValue,TResult> (string parentType, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure)
 		{
-			CheckType (parentType, "parentType");
-			CheckId (parentId, "parentId");
-			CheckField (field);
+			CheckArgument (parentType, "parentType");
+			CheckArgument (parentId, "parentId");
+			CheckArgument (field, "field");
 			if (values == null)
 				throw new ArgumentNullException ("values");
 			if (success == null)
@@ -678,28 +678,12 @@ namespace StackMob
 				failure);
 		}
 
-		private static void CheckField (string field)
+		private static void CheckArgument (string value, string name)
 		{
-			if (field == null)
-				throw new ArgumentNullException ("field");
-			if (field.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty field", "field");
-		}
-
-		private static void CheckId (string id, string name = "id")
-		{
-			if (id == null)
+			if (value == null)
 				throw new ArgumentNullException (name);
-			if (id.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty " + name, name);
-		}
-
-		private static void CheckType (string type, string name = "type")
-		{
-			if (type == null)
-				throw new ArgumentNullException (name);
-			if (type.Trim() == String.Empty)
-				throw new ArgumentException ("Can not have an empty " + name, name);
+			if (value.Trim() == String.Empty)
+				throw new ArgumentException (name + " can not be empty", name);
 		}
 
 		private static string FindIdentityColumn (JsonObject properties)
