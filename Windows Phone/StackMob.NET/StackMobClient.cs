@@ -398,11 +398,7 @@ namespace StackMob
 
 			var req = GetRequest (type, "GET");
 			Execute (req,
-				s =>
-				{
-					var result = JsonSerializer.DeserializeFromStream<IEnumerable<T>> (s);
-					success (result);
-				},
+				s => success (JsonSerializer.DeserializeFromStream<IEnumerable<T>> (s)),
 				failure);
 		}
 
@@ -432,11 +428,7 @@ namespace StackMob
 
 			var req = GetRequest (type, "GET", id);
 			Execute (req,
-				s =>
-				{
-					T result = JsonSerializer.DeserializeFromStream<T> (s);
-					success (result);
-				},
+				s => success (JsonSerializer.DeserializeFromStream<T> (s)),
 				failure);
 		}
 
@@ -452,11 +444,7 @@ namespace StackMob
 
 			var req = GetRequest (type, "GET", query: GetQueryForArguments (filters));
 			Execute (req,
-				s =>
-				{
-					IEnumerable<T> result = JsonSerializer.DeserializeFromStream<IEnumerable<T>> (s);
-					success (result);
-				},
+				s => success (JsonSerializer.DeserializeFromStream<IEnumerable<T>> (s)),
 				failure);
 		}
 
