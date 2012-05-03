@@ -18,12 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
-using OAuth;
 using ServiceStack.Text;
+using SimpleOAuth;
 
 namespace StackMob
 {
@@ -903,18 +901,15 @@ namespace StackMob
 			if (!String.IsNullOrWhiteSpace (query))
 				url += "?" + query;
 
-			var oAuthRequest = new OAuth.OAuthRequest();
-			oAuthRequest.RequestUrl = url;
-			oAuthRequest.ConsumerKey = this.apiKey;
-			oAuthRequest.ConsumerSecret = this.apiSecret;
-			oAuthRequest.SignatureMethod = OAuthSignatureMethod.HmacSha1;
-			oAuthRequest.Method = method;
-			oAuthRequest.Type = OAuthRequestType.ProtectedResource;
-
 			var request = (HttpWebRequest)WebRequest.Create (url);
 			request.Method = method;
 			request.Accept = this.accepts;
-			request.Headers ["Authorization"] = oAuthRequest.GetAuthorizationHeader();
+
+			request.SignRequest (new Tokens
+			{
+				ConsumerKey = this.apiKey,
+				ConsumerSecret = this.apiSecret
+			}).InHeader();
 
 			return request;
 		}
