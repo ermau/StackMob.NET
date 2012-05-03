@@ -41,11 +41,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OAuth.WindowsPhone.Mango">
-      <HintPath>..\..\packages\OAuth.1.0.3\lib\sl4-wp71\OAuth.WindowsPhone.Mango.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text.WP">
+    <Reference Include="ServiceStack.Text.WP, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ServiceStack.Text.3.6.9\lib\sl4-windowsphone71\ServiceStack.Text.WP.dll</HintPath>
+    </Reference>
+    <Reference Include="SimpleOAuth.WP.Mango">
+      <HintPath>..\..\packages\SimpleOAuth.Net.1.0.1\lib\sl4-windowsphone71\SimpleOAuth.WP.Mango.dll</HintPath>
     </Reference>
     <Reference Include="system" />
     <Reference Include="System.Core" />
