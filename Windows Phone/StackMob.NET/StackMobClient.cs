@@ -961,7 +961,7 @@ namespace StackMob
 
 		private HttpWebRequest GetRequest (string resource, string method, string id = "", string query = "")
 		{
-			string url = "http://api.mob1.stackmob.com/" + resource;
+			string url = "https://api.mob1.stackmob.com/" + resource;
 			if (!String.IsNullOrWhiteSpace (id))
 				url += "/" + id;
 
