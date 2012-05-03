@@ -354,6 +354,11 @@ namespace StackMob
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		public void Get (string type, Action<IEnumerable<IDictionary<string, object>>> success, Action<Exception> failure)
+		{
+			Get<IDictionary<string, object>> (type, success, failure);
+		}
+
 		/// <summary>
 		/// Gets all objects of the given <paramref name="type"/>.
 		/// </summary>
