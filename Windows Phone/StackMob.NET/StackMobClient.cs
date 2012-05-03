@@ -769,12 +769,24 @@ namespace StackMob
 		private readonly string userObjectName;
 		private readonly string appname;
 
+		private JsonObject apis;
 		private void GetApis (Action<JsonObject> success, Action<Exception> failure)
 		{
-			var req = GetRequest ("listapi", "GET");
-			Execute (req,
-				s => success (JsonSerializer.DeserializeFromStream<JsonObject> (s)),
-				failure);
+			if (this.apis == null)
+			{
+				var req = GetRequest ("listapi", "GET");
+				Execute (req,
+						s =>
+						{
+							this.apis = JsonSerializer.DeserializeFromStream<JsonObject> (s);
+							success (this.apis);
+						},
+						failure);
+			}
+			else
+			{
+				success (this.apis);
+			}
 		}
 
 		private void DeleteFromCore<TValue, TResult> (string parentType, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure, bool cascade = false)
