@@ -25,6 +25,8 @@ using SimpleOAuth;
 
 namespace StackMob
 {
+	public delegate void ThirdPartyLoginSuccess (string username, IDictionary<string, object> thirdPartyInfo);
+
 	/// <summary>
 	/// A class providing a client interface to the StackMob.com APIs.
 	/// </summary>
@@ -628,6 +630,28 @@ namespace StackMob
 				failure);
 		}
 
+		public void LoginWithFacebook (string facebookAccessToken, ThirdPartyLoginSuccess success, Action<Exception> failure)
+		{
+			CheckArgument (facebookAccessToken, "facebookAccessToken");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var args = new Dictionary<string, string>();
+			args["fb_at"] = facebookAccessToken;
+
+			var req = GetRequest (this.userObjectName, "/facebookLogin", query: GetQueryForArguments (args));
+			Execute (req,
+				s =>
+				{
+					JsonObject jobj = JsonSerializer.DeserializeFromStream<JsonObject> (s);
+					var fb = JsonSerializer.DeserializeFromString<IDictionary<string, object>> (jobj ["fb"]);
+					success (jobj ["username"], fb);
+				},
+				failure);
+		}
+
 		public void CreateUserWithTwitter (string username, string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
 		{
 			CheckArgument (username, "username");
@@ -648,7 +672,7 @@ namespace StackMob
 				failure);
 		}
 
-		public void LoginWithTwitter (string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
+		public void LoginWithTwitter (string twitterToken, string twitterSecret, ThirdPartyLoginSuccess success, Action<Exception> failure)
 		{
 			CheckArgument (twitterToken, "twitterToken");
 			CheckArgument (twitterSecret, "twitterSecret");
@@ -663,7 +687,12 @@ namespace StackMob
 
 			var req = GetRequest (this.userObjectName + "/twitterLogin", "GET", query: GetQueryForArguments (args));
 			Execute (req,
-				s => success(),
+				s =>
+				{
+					JsonObject jobj = JsonSerializer.DeserializeFromStream<JsonObject> (s);
+					var tw = JsonSerializer.DeserializeFromString<IDictionary<string, object>> (jobj ["tw"]);
+					success (jobj ["username"], tw);
+				},
 				failure);
 		}
 
