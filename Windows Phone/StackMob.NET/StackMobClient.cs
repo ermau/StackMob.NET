@@ -716,6 +716,19 @@ namespace StackMob
 				failure);
 		}
 
+		public void GetTwitterUserInfo (Action<IDictionary<string, object>> success, Action<Exception> failure)
+		{
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var req = GetRequest (this.userObjectName + "/getTwitterUserInfo", "GET");
+			Execute (req,
+				s => success (JsonSerializer.DeserializeFromStream<IDictionary<string, object>> (s)),
+				failure);
+		}
+
 		public void Tweet (string contents, Action success, Action<Exception> failure)
 		{
 			CheckArgument (contents, "contents");
