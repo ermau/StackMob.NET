@@ -755,6 +755,23 @@ namespace StackMob
 				failure);
 		}
 
+		public void ForgotPassword (string username, Action success, Action<Exception> failure)
+		{
+			CheckArgument (username, "username");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var args = new Dictionary<string, string>();
+			args ["username"] = username;
+
+			var req = GetRequest (this.userObjectName + "/forgotPassword", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
 		public void Logout (Action success, Action<Exception> failure)
 		{
 			if (success == null)
