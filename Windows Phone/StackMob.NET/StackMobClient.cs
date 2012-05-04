@@ -862,9 +862,9 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			JsonObject jobj = new JsonObject();
+			var jobj = new Dictionary<string, object>();
 			jobj["userId"] = username;
-			jobj["token"] = token.ToJsonObject().ToJson();
+			jobj["token"] = token.ToJsonObject();
 
 			var req = GetPushRequest ("register_device_token_universal", "POST");
 			Execute (req,
