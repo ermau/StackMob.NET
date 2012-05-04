@@ -53,6 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PushPayload.cs" />
+    <Compile Include="PushToken.cs" />
     <Compile Include="StackMobClient.cs" />
   </ItemGroup>
   <ItemGroup>

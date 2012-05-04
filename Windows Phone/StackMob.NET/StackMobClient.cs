@@ -836,6 +836,43 @@ namespace StackMob
 			}
 		}
 
+		private void Push (PushPayload payload, JsonObject target, Action success, Action<Exception> failure)
+		{
+			if (payload == null)
+				throw new ArgumentNullException ("payload");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			target ["payload"] = "{\"kvPairs\":" + payload.ToJson<IDictionary<string, object>>() + "}";
+
+			var req = GetRequest ("push_users_universal", "POST");
+			Execute (req,
+				s => JsonSerializer.SerializeToStream (target, s),
+				s => success(),
+				failure);
+		}
+
+		private void RegisterPush (string username, PushToken token, Action success, Action<Exception> failure)
+		{
+			CheckArgument (username, "username");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			JsonObject jobj = new JsonObject();
+			jobj["userId"] = username;
+			jobj["token"] = token.ToJsonObject().ToJson();
+
+			var req = GetRequest ("register_device_token_universal", "POST");
+			Execute (req,
+				s => JsonSerializer.SerializeToStream (jobj, s),
+				s => success(),
+				failure);
+		}
+
 		private void DeleteFromCore<TValue, TResult> (string parentType, string parentId, string field, IEnumerable<TValue> values, Action<TResult> success, Action<Exception> failure, bool cascade = false)
 		{
 			CheckArgument (parentType, "parentType");

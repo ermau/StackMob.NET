@@ -48,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Windows Phone\StackMob.NET\PushPayload.cs">
+      <Link>PushPayload.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Windows Phone\StackMob.NET\PushToken.cs">
+      <Link>PushToken.cs</Link>
+    </Compile>
     <Compile Include="..\..\Windows Phone\StackMob.NET\StackMobClient.cs">
       <Link>StackMobClient.cs</Link>
     </Compile>
