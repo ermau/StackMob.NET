@@ -148,7 +148,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (parentType, "POST", parentId + "/" + field);
+			var req = GetRequest (parentType, "POST", id: parentId + "/" + field);
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (items, s),
 				s =>
@@ -220,7 +220,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "PUT", id);
+			var req = GetRequest (type, "PUT", id: id);
 
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (value, s),
@@ -428,7 +428,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "GET", id);
+			var req = GetRequest (type, "GET", id: id);
 			Execute (req,
 				s => success (JsonSerializer.DeserializeFromStream<T> (s)),
 				failure);
@@ -478,7 +478,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "DELETE", id);
+			var req = GetRequest (type, "DELETE", id: id);
 			Execute (req, s => success(), failure);
 		}
 
@@ -847,7 +847,7 @@ namespace StackMob
 
 			target ["payload"] = "{\"kvPairs\":" + payload.ToJson<IDictionary<string, object>>() + "}";
 
-			var req = GetRequest ("push_users_universal", "POST");
+			var req = GetPushRequest ("push_users_universal", "POST");
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (target, s),
 				s => success(),
@@ -866,7 +866,7 @@ namespace StackMob
 			jobj["userId"] = username;
 			jobj["token"] = token.ToJsonObject().ToJson();
 
-			var req = GetRequest ("register_device_token_universal", "POST");
+			var req = GetPushRequest ("register_device_token_universal", "POST");
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (jobj, s),
 				s => success(),
@@ -892,7 +892,7 @@ namespace StackMob
 					ids.Append (value.ToString());
 			}
 
-			var req = GetRequest (parentType, "DELETE", parentId + "/" + ids);
+			var req = GetRequest (parentType, "DELETE", id: parentId + "/" + ids);
 			if (cascade)
 				req.Headers["X-StackMob-CascadeDelete"] = "true";
 
@@ -913,7 +913,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (parentType, "PUT", parentId + "/" + field);
+			var req = GetRequest (parentType, "PUT", id: parentId + "/" + field);
 			Execute (req,
 				s => JsonSerializer.SerializeToStream (values, s),
 				s => success (JsonSerializer.DeserializeFromStream<TResult> (s)),
@@ -1045,7 +1045,17 @@ namespace StackMob
 
 		private HttpWebRequest GetRequest (string resource, string method, string id = "", string query = "")
 		{
-			string url = "https://api.mob1.stackmob.com/" + resource;
+			return GetRequest ("api", resource, method, id, query);
+		}
+
+		private HttpWebRequest GetPushRequest (string resource, string method, string id = "", string query = "")
+		{
+			return GetRequest ("push", resource, method, id, query);
+		}
+
+		private HttpWebRequest GetRequest (string subdomain, string resource, string method, string id = "", string query = "")
+		{
+			string url = "https://" + subdomain + ".mob1.stackmob.com/" + resource;
 			if (!String.IsNullOrWhiteSpace (id))
 				url += "/" + id;
 
