@@ -30,7 +30,7 @@ namespace StackMob
 	/// <summary>
 	/// A class providing a client interface to the StackMob.com APIs.
 	/// </summary>
-	public class StackMobClient
+	public partial class StackMobClient
 	{
 		public StackMobClient (string apiKey, string apiSecret, string appname, int apiVersion, string userObjectName = "user")
 		{
