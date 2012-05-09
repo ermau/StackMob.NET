@@ -16,8 +16,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using ServiceStack.Text;
 
 namespace StackMob
 {
@@ -26,35 +24,6 @@ namespace StackMob
 		public void RegisterPush (string username, string registrationId, Action success, Action<Exception> failure)
 		{
 			RegisterPush (username, new PushToken (PushTokenType.Android, registrationId), success, failure);
-		}
-
-		public void Push (PushPayload payload, Action success, Action<Exception> failure)
-		{
-			JsonObject target = new JsonObject();
-
-			Push (payload, target, success, failure);
-		}
-
-		public void Push (PushPayload payload, IEnumerable<string> ids, Action success, Action<Exception> failure)
-		{
-			if (ids == null)
-				throw new ArgumentNullException ("ids");
-
-			JsonObject target = new JsonObject();
-			target ["userIds"] = ids.ToJson();
-
-			Push (payload, target, success, failure);
-		}
-
-		public void Push (PushPayload payload, IEnumerable<PushToken> tokens, Action success, Action<Exception> failure)
-		{
-			if (tokens == null)
-				throw new ArgumentNullException ("tokens");
-
-			JsonObject target = new JsonObject();
-			target ["tokens"] = tokens.ToJson();
-
-			Push (payload, target, success, failure);
 		}
 	}
 }
