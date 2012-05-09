@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using ServiceStack.Text;
@@ -807,9 +808,7 @@ namespace StackMob
 
 		public void Push (PushPayload payload, Action success, Action<Exception> failure)
 		{
-			JsonObject target = new JsonObject();
-
-			Push (payload, target, success, failure);
+			Push (payload, new Dictionary<string, object>(), success, failure);
 		}
 
 		public void Push (PushPayload payload, IEnumerable<string> ids, Action success, Action<Exception> failure)
@@ -817,10 +816,10 @@ namespace StackMob
 			if (ids == null)
 				throw new ArgumentNullException ("ids");
 
-			JsonObject target = new JsonObject();
-			target ["userIds"] = ids.ToJson();
+			var values = new Dictionary<string, object>();
+			values ["userIds"] = ids;
 
-			Push (payload, target, success, failure);
+			Push (payload, values, success, failure);
 		}
 
 		public void Push (PushPayload payload, IEnumerable<PushToken> tokens, Action success, Action<Exception> failure)
@@ -828,10 +827,10 @@ namespace StackMob
 			if (tokens == null)
 				throw new ArgumentNullException ("tokens");
 
-			JsonObject target = new JsonObject();
-			target ["tokens"] = tokens.ToJson();
+			var values = new Dictionary<string, object>();
+			values ["tokens"] = tokens.Select (t => t.ToJsonObject()).ToJson();
 
-			Push (payload, target, success, failure);
+			Push (payload, values, success, failure);
 		}
 
 		private DateTime loginTime;
@@ -865,7 +864,7 @@ namespace StackMob
 			}
 		}
 
-		private void Push (PushPayload payload, JsonObject target, Action success, Action<Exception> failure)
+		private void Push (PushPayload payload, IDictionary<string, object> target, Action success, Action<Exception> failure)
 		{
 			if (payload == null)
 				throw new ArgumentNullException ("payload");
@@ -874,7 +873,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			target ["payload"] = "{\"kvPairs\":" + payload.ToJson<IDictionary<string, object>>() + "}";
+			target ["kvPairs"] = payload;
 
 			var req = GetPushRequest ("push_users_universal", "POST");
 			Execute (req,
