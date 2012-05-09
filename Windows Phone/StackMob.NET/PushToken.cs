@@ -16,6 +16,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using ServiceStack.Text;
 
 namespace StackMob
@@ -53,9 +54,9 @@ namespace StackMob
 			private set;
 		}
 
-		internal JsonObject ToJsonObject()
+		internal IDictionary<string,object> ToJsonObject()
 		{
-			JsonObject jobj = new JsonObject();
+			var jobj = new Dictionary<string, object>();
 			jobj["type"] = Type.ToString().ToLower();
 			jobj["token"] = Token;
 			return jobj;
