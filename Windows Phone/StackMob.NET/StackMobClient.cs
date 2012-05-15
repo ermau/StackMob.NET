@@ -653,6 +653,53 @@ namespace StackMob
 				failure);
 		}
 
+		public void LinkAccountToFacebook (string facebookAccessToken, Action success, Action<Exception> failure)
+		{
+			CheckArgument (facebookAccessToken, "facebookAccessToken");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var args = new Dictionary<string, string>();
+			args ["fb_at"] = facebookAccessToken;
+
+			var req = GetRequest (this.userObjectName + "/linkUserWithFacebook", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
+		public void GetFacebookUserInfo (Action<IDictionary<string, object>> success, Action<Exception> failure)
+		{
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var req = GetRequest (this.userObjectName + "/getFacebookUserInfo", "GET");
+			Execute (req,
+				s => success (JsonSerializer.DeserializeFromStream<IDictionary<string, object>> (s)),
+				failure);
+		}
+
+		public void PostToFacebook (string message, Action success, Action<Exception> failure)
+		{
+			CheckArgument (message, "message");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var args = new Dictionary<string, string>();
+			args["message"] = message;
+
+			var req = GetRequest (this.userObjectName + "/postFacebookMessage", "GET", query: GetQueryForArguments (args));
+			Execute (req,
+				s => success(),
+				failure);
+		}
+
 		public void CreateUserWithTwitter (string username, string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
 		{
 			CheckArgument (username, "username");
@@ -730,7 +777,7 @@ namespace StackMob
 				failure);
 		}
 
-		public void Tweet (string contents, Action success, Action<Exception> failure)
+		public void PostToTwitter (string contents, Action success, Action<Exception> failure)
 		{
 			CheckArgument (contents, "contents");
 
