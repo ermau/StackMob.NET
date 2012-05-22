@@ -866,6 +866,8 @@ namespace StackMob
 			Execute (req,
 				s => success(),
 				failure);
+
+			this.cookieJar = new CookieContainer();
 		}
 
 		public void Push (PushPayload payload, Action success, Action<Exception> failure)
@@ -899,6 +901,7 @@ namespace StackMob
 		private string usernameField;
 		private string loginUsername;
 
+		private CookieContainer cookieJar = new CookieContainer();
 		private readonly string accepts;
 
 		private readonly string apiKey;
@@ -1153,6 +1156,7 @@ namespace StackMob
 				url += "?" + query;
 
 			var request = (HttpWebRequest)WebRequest.Create (url);
+			request.CookieContainer = this.cookieJar;
 			request.Method = method;
 			request.Accept = this.accepts;
 
