@@ -657,7 +657,7 @@ namespace StackMob
 			var args = new Dictionary<string, string>();
 			args["fb_at"] = facebookAccessToken;
 
-			var req = GetRequest (this.userObjectName, "/facebookLogin", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userObjectName + "/facebookLogin", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s =>
 				{
