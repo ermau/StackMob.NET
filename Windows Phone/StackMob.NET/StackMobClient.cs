@@ -435,7 +435,22 @@ namespace StackMob
 				failure);
 		}
 
-		public void Get<T> (string type, IDictionary<string, string> filters, Action<IEnumerable<T>> success, Action<Exception> failure)
+		/// <summary>
+		/// Gets objects with the given <paramref name="filters"/>.
+		/// </summary>
+		/// <typeparam name="T">The parentType of object to retrieve.</typeparam>
+		/// <param name="type">The parentType name (schema) of the object to retrieve.</param>
+		/// <param name="filters">Filters </param>
+		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="filters"/>, <paramref name="success"/>,
+		/// or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/> is an empty string.
+		/// </exception>
+		public void Get<T> (string type, IEnumerable<KeyValuePair<string, string>> filters, Action<IEnumerable<T>> success, Action<Exception> failure)
 		{
 			CheckArgument (type, "type");
 			if (filters == null)

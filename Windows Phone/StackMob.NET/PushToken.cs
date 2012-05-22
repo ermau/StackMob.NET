@@ -27,8 +27,22 @@ namespace StackMob
 		iOS
 	}
 
+	/// <summary>
+	/// Class representing a token for push. 
+	/// </summary>
 	public class PushToken
 	{
+		/// <summary>
+		/// Creates and initializes a new <see cref="PushToken"/> instance.
+		/// </summary>
+		/// <param name="type">The type of token in <paramref name="token"/>.</param>
+		/// <param name="token">The token.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="token"/> is <c>null</c>.</exception>
+		/// <exception cref="ArgumentException">
+		/// <para><paramref name="type" /> is not a valid <see cref="PushTokenType"/></para>
+		/// <para>-- or --</para>
+		/// <para><paramref name="token"/> is an empty string.</para>
+		/// </exception>
 		public PushToken (PushTokenType type, string token)
 		{
 			if (!Enum.IsDefined (typeof(PushTokenType), type))
@@ -42,12 +56,18 @@ namespace StackMob
 			Token = token;
 		}
 
+		/// <summary>
+		/// Gets the type of the token.
+		/// </summary>
 		public PushTokenType Type
 		{
 			get;
 			private set;
 		}
 
+		/// <summary>
+		/// Gets the token.
+		/// </summary>
 		public string Token
 		{
 			get;

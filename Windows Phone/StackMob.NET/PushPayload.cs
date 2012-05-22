@@ -23,7 +23,7 @@ namespace StackMob
 		: Dictionary<string, object>
 	{
 		/// <summary>
-		/// Gets or sets the badge count to set.
+		/// Gets or sets the iOS badge count to set.
 		/// </summary>
 		public int Badge
 		{
@@ -32,7 +32,7 @@ namespace StackMob
 		}
 
 		/// <summary>
-		/// Gets or sets the filename of the sound to play.
+		/// Gets or sets the iOS filename of the sound to play.
 		/// </summary>
 		public string Sound
 		{
@@ -41,7 +41,7 @@ namespace StackMob
 		}
 
 		/// <summary>
-		/// Gets or sets the alert text.
+		/// Gets or sets the iOS alert text.
 		/// </summary>
 		public string Alert
 		{
