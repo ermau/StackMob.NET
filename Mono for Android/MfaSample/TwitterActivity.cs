@@ -12,15 +12,16 @@ using Android.Runtime;
 using Android.Views;
 using Android.Webkit;
 using Android.Widget;
+using SimpleOAuth;
 
 namespace MfaSample
 {
-	[Activity(Label = "StackMob Facebook Sample")]
-	public class FacebookActivity : Activity
+	[Activity(Label = "StackMob Twitter Sample")]
+	public class TwitterActivity : Activity
 	{
-		// Facebook API values
-		private const string AppId = "app id";
-		private const string AppSecret = "app secret";
+		// Twitter API values
+		private const string ConsumerKey = "consumer key";
+		private const string ConsumerSecret = "consumer secret";
 		private const string RedirectUri = "redirect uri";
 
 		protected override void OnCreate (Bundle bundle)
@@ -29,58 +30,61 @@ namespace MfaSample
 			SetContentView (Resource.Layout.Social);
 
 			this.display = FindViewById<TextView> (Resource.Id.display);
-
-			WebView web = FindViewById<WebView> (Resource.Id.web);
+			this.web = FindViewById<WebView> (Resource.Id.web);
 
 			FindViewById<Button> (Resource.Id.createuser)
-				.Click += OnClickFacebookCreate;
+				.Click += OnClickTwitterCreate;
 
 			FindViewById<Button> (Resource.Id.login)
-				.Click += OnClickFacebookLogin;
+				.Click += OnClickTwitterLogin;
 
 			FindViewById<Button> (Resource.Id.info)
-				.Click += OnClickFacebookInfo;
+				.Click += OnClickTwitterInfo;
 
 			this.actionLayout = FindViewById<LinearLayout> (Resource.Id.actionsLayout);
 
-			FacebookAuthClient client = new FacebookAuthClient (web);
+			TwitterAuthClient client = new TwitterAuthClient (web);
 			web.SetWebViewClient (client);
 
 			client.AccessToken.ContinueWith (OnAccessTokenReceived);
 			client.Auth();
 		}
 
-		private void OnClickFacebookCreate (object sender, EventArgs eventArgs)
+		private void OnClickTwitterCreate (object sender, EventArgs eventArgs)
 		{
-			StackMobActivity.StackMob.CreateUserWithFacebook ("fbtestuser", this.accessToken,
+			StackMobActivity.StackMob.CreateUserWithTwitter ("twtestuser", this.accessToken, this.accessSecret,
 				() => Display ("User created"), Display);
 		}
 
-		private void OnClickFacebookInfo (object sender, EventArgs eventArgs)
+		private void OnClickTwitterInfo (object sender, EventArgs eventArgs)
 		{
-			StackMobActivity.StackMob.GetFacebookUserInfo (Display, Display);
+			StackMobActivity.StackMob.GetTwitterUserInfo (Display, Display);
 		}
 
-		private void OnClickFacebookLogin (object sender, EventArgs eventArgs)
+		private void OnClickTwitterLogin (object sender, EventArgs eventArgs)
 		{
-			StackMobActivity.StackMob.LoginWithFacebook (this.accessToken,
+			StackMobActivity.StackMob.LoginWithTwitter (this.accessToken, this.accessSecret,
 				(username, dict) => Display ("Username: " + username + System.Environment.NewLine + GetStringForDictionary (dict)),
 				Display);
 		}
 
 		private TextView display;
 		private LinearLayout actionLayout;
-		private string accessToken;
+		private WebView web;
 
-		private void OnAccessTokenReceived (Task<string> task)
+		private string accessToken;
+		private string accessSecret;
+
+		private void OnAccessTokenReceived (Task<Tuple<string, string>> task)
 		{
 			RunOnUiThread (() =>
 			{
 				if (task.IsFaulted)
-					Toast.MakeText (this, "Error: " + task.Exception.InnerExceptions.First().Message, ToastLength.Long).Show();
+					Display (task.Exception.InnerException);
 				else
 				{
-					this.accessToken = task.Result;
+					this.accessToken = task.Result.Item1;
+					this.accessSecret = task.Result.Item2;
 					this.actionLayout.Visibility = ViewStates.Visible;
 				}
 			});
@@ -93,7 +97,7 @@ namespace MfaSample
 			{
 				using (Stream stream = wex.Response.GetResponseStream())
 				using (StreamReader reader = new StreamReader (stream))
-					Display (reader.ReadToEnd() + System.Environment.NewLine + ex.ToString());
+					Display (reader.ReadToEnd() + System.Environment.NewLine + ex);
 			}
 			else
 				Display (ex.ToString());
@@ -120,18 +124,20 @@ namespace MfaSample
 
 		private void Display (string text)
 		{
+			this.web.Visibility = ViewStates.Gone;
+			this.actionLayout.Visibility = ViewStates.Visible;
 			RunOnUiThread (() => this.display.Text = text);
 		}
 
-		private class FacebookAuthClient
+		private class TwitterAuthClient
 			: WebViewClient
 		{
-			public FacebookAuthClient (WebView view)
+			public TwitterAuthClient (WebView view)
 			{
 				this.view = view;
 			}
 
-			public Task<string> AccessToken
+			public Task<Tuple<string, string>> AccessToken
 			{
 				get { return this.tcs.Task; }
 			}
@@ -139,11 +145,37 @@ namespace MfaSample
 			public void Auth()
 			{
 				this.view.Visibility = ViewStates.Visible;
-				this.requestId = Guid.NewGuid().ToString();
 
-				this.view.LoadUrl ("https://www.facebook.com/dialog/oauth?client_id=" + AppId
-				                   + "&redirect_uri=" + Uri.EscapeUriString (RedirectUri)
-				                   + "&state=" + Uri.EscapeUriString (this.requestId));
+				HttpWebRequest request = new HttpWebRequest (new Uri ("https://api.twitter.com/oauth/request_token"));
+				request.SignRequest (new Tokens { ConsumerKey = ConsumerKey, ConsumerSecret = ConsumerSecret })
+					.WithCallback (RedirectUri)
+					.InHeader();
+
+				try
+				{
+					HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+					using (Stream rstream = response.GetResponseStream())
+					using (StreamReader reader = new StreamReader (rstream))
+					{
+						string rcontents = reader.ReadToEnd();
+						var values = ParseQueryString (rcontents);
+						if (values["oauth_callback_confirmed"] != "true")
+						{
+							this.tcs.SetException (new Exception ("Callback not confirmed"));
+							return;
+						}
+
+						this.token = values ["oauth_token"];
+						this.secret = values ["oauth_token_secret"];
+					}
+				}
+				catch (Exception ex)
+				{
+					this.tcs.SetException (ex);
+					return;
+				}
+
+				this.view.LoadUrl ("https://api.twitter.com/oauth/authenticate?oauth_token=" + this.token);
 			}
 
 			public override void OnPageStarted (WebView view, string url, Android.Graphics.Bitmap favicon)
@@ -155,23 +187,29 @@ namespace MfaSample
 
 				var values = ParseQueryString (new Uri (url).Query);
 
-				if (values ["state"] != this.requestId)
+				if (values["oauth_token"] != this.token)
 				{
-					this.tcs.SetException (new Exception ("State mismatch"));
+					this.tcs.SetException (new Exception ("Invalid token"));
 					return;
 				}
 
-				if (!values.ContainsKey ("code"))
-				{
-					this.tcs.SetException (new Exception ("No code"));
-					return;
-				}
+				this.verifier = values ["oauth_verifier"];
 
-				HttpWebRequest request =
-					new HttpWebRequest (new Uri ("https://graph.facebook.com/oauth/access_token?client_id=" + AppId
-						                            + "&redirect_uri=" + Uri.EscapeUriString (RedirectUri)
-						                            + "&client_secret=" + Uri.EscapeUriString (AppSecret)
-						                            + "&code=" + Uri.EscapeUriString (values ["code"])));
+				HttpWebRequest request = new HttpWebRequest (new Uri ("https://api.twitter.com/oauth/access_token"));
+				request.Method = "POST";
+				request.SignRequest (new Tokens
+				{
+					ConsumerKey = ConsumerKey,
+					ConsumerSecret = ConsumerSecret,
+					AccessToken = this.token,
+					AccessTokenSecret = this.secret
+				}).InHeader();
+
+				using (StreamWriter writer = new StreamWriter (request.GetRequestStream()))
+				{
+					writer.Write ("oauth_verifier=" + this.verifier);
+					writer.Flush();
+				}
 
 				try
 				{
@@ -182,8 +220,7 @@ namespace MfaSample
 						string response = Uri.UnescapeDataString (reader.ReadToEnd());
 						var parts = ParseQueryString (response);
 
-						string token = parts ["access_token"];
-						this.tcs.SetResult (token);
+						this.tcs.SetResult (new Tuple<string, string> (parts ["oauth_token"], parts ["oauth_token_secret"]));
 					}
 				}
 				catch (WebException ex)
@@ -194,9 +231,12 @@ namespace MfaSample
 				base.OnPageStarted (view, url, favicon);
 			}
 			
-			private readonly TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
+			private readonly TaskCompletionSource<Tuple<string, string>> tcs = new TaskCompletionSource<Tuple<string, string>>();
 			private readonly WebView view;
-			private string requestId;
+			
+			private string token;
+			private string secret;
+			private string verifier;
 
 			private IDictionary<string, string> ParseQueryString (string query)
 			{

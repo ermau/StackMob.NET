@@ -30,6 +30,9 @@ namespace MfaSample
 			FindViewById<Button> (Resource.Id.facebook)
 				.Click += (sender, args) => StartActivity (new Intent (this, typeof (FacebookActivity)));
 
+			FindViewById<Button> (Resource.Id.twitter)
+				.Click += (sender, args) => StartActivity (new Intent (this, typeof (TwitterActivity)));
+
 			FindViewById<Button> (Resource.Id.login)
 				.Click += OnLoginClicked;
 
