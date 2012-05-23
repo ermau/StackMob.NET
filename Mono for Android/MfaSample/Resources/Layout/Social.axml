@@ -27,23 +27,23 @@
                 android:text="Create User"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:id="@+id/fbcreateuser"
+                android:id="@+id/createuser"
                 android:layout_weight="0.5" />
             <Button
                 android:text="Login"
-                android:id="@+id/fblogin"
+                android:id="@+id/login"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_weight="0.5" />
         </LinearLayout>
         <Button
-            android:text="Facebook Info"
+            android:text="Social User Info"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/fbinfo" />
+            android:id="@+id/info" />
     </LinearLayout>
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/fbdisplay" />
+        android:id="@+id/display" />
 </LinearLayout>

@@ -25,19 +25,19 @@ namespace MfaSample
 		protected override void OnCreate (Bundle bundle)
 		{
 			base.OnCreate(bundle);
-			SetContentView (Resource.Layout.Facebook);
+			SetContentView (Resource.Layout.Social);
 
-			this.display = FindViewById<TextView> (Resource.Id.fbdisplay);
+			this.display = FindViewById<TextView> (Resource.Id.display);
 
 			WebView web = FindViewById<WebView> (Resource.Id.web);
 
-			FindViewById<Button> (Resource.Id.fbcreateuser)
+			FindViewById<Button> (Resource.Id.createuser)
 				.Click += OnClickFacebookCreate;
 
-			FindViewById<Button> (Resource.Id.fblogin)
+			FindViewById<Button> (Resource.Id.login)
 				.Click += OnClickFacebookLogin;
 
-			FindViewById<Button> (Resource.Id.fbinfo)
+			FindViewById<Button> (Resource.Id.info)
 				.Click += OnClickFacebookInfo;
 
 			this.actionLayout = FindViewById<LinearLayout> (Resource.Id.actionsLayout);

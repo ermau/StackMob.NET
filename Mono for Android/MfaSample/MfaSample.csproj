@@ -56,7 +56,7 @@
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
-    <AndroidResource Include="Resources\Layout\Facebook.axml">
+    <AndroidResource Include="Resources\Layout\Social.axml">
       <SubType>AndroidResource</SubType>
     </AndroidResource>
   </ItemGroup>
