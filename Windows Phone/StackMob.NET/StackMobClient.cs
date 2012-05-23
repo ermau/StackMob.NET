@@ -728,6 +728,7 @@ namespace StackMob
 			var args = new Dictionary<string, string>();
 			args["tw_tk"] = twitterToken;
 			args["tw_ts"] = twitterSecret;
+			args["username"] = username;
 
 			var req = GetRequest (this.userObjectName + "/createuserWithTwitter", "GET", query: GetQueryForArguments (args));
 			Execute (req,
