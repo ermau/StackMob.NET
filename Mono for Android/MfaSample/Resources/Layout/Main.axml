@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <Button
+        android:text="Login"
+        android:id="@+id/login"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:text="Facebook &gt;"
+        android:id="@+id/facebook"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:text="Twitter &gt;"
+        android:id="@+id/twitter"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout1">
+        <Button
+            android:text="Create"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:id="@+id/create"
+            android:layout_weight="0.33" />
+        <Button
+            android:text="Get"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:id="@+id/get"
+            android:layout_weight="0.33" />
+        <Button
+            android:text="Update"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:id="@+id/update"
+            android:layout_weight="0.33" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/display" />
+</LinearLayout>
