@@ -926,8 +926,12 @@ namespace StackMob
 		/// <exception cref="ArgumentNullException"><paramref name="arguments"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c> </exception>
 		public void Login (IDictionary<string, string> arguments, Action success, Action<Exception> failure)
 		{
-		    if (arguments == null)
-		        throw new ArgumentNullException ("arguments");
+			if (arguments == null)
+				throw new ArgumentNullException ("arguments");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
 
 			this.loginUsername = null;
 
