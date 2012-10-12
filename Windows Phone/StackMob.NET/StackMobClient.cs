@@ -71,7 +71,7 @@ namespace StackMob
 		/// </summary>
 		/// <param name="type">The type of object (the schema) to create.</param>
 		/// <param name="values">A dictionary of columns and values.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <paramref name="type" />, <paramref name="values"/>, <paramref name="success"/>
@@ -89,7 +89,7 @@ namespace StackMob
 		/// <typeparam name="T">The parentType of object to create.</typeparam>
 		/// <param name="type">The name of the schema the parentType is stored in.</param>
 		/// <param name="value">The object to store.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <paramref name="type" />, <paramref name="success"/> or <paramref name="failure"/> are <c>null</c>.
@@ -123,7 +123,7 @@ namespace StackMob
 		/// <param name="parentId">The id of the parent object.</param>
 		/// <param name="field">The relationship or array field.</param>
 		/// <param name="items">The items to create.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -178,7 +178,7 @@ namespace StackMob
 		/// <param name="type">The parentType (schema) of object to update.</param>
 		/// <param name="id">The id of the object to update.</param>
 		/// <param name="values">A dictionary of columns to values.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -201,7 +201,7 @@ namespace StackMob
 		/// <param name="type">The parentType (schema) of object to update.</param>
 		/// <param name="id">The id of the object to update.</param>
 		/// <param name="value">The latest representation of the object.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -237,7 +237,7 @@ namespace StackMob
 		/// <param name="parentId">The id of the parent object to update.</param>
 		/// <param name="field">The array field.</param>
 		/// <param name="values">The values to append.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -261,7 +261,7 @@ namespace StackMob
 		/// <param name="parentId">The id of the parent object to update.</param>
 		/// <param name="field">The array field.</param>
 		/// <param name="values">The values to append.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -285,7 +285,7 @@ namespace StackMob
 		/// <param name="parentId">The id of the parent object to update.</param>
 		/// <param name="field">The array field.</param>
 		/// <param name="values">The values to append.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -309,7 +309,7 @@ namespace StackMob
 		/// <param name="parentId">The id of the parent object to update.</param>
 		/// <param name="field">The array field.</param>
 		/// <param name="values">The values to append.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -333,7 +333,7 @@ namespace StackMob
 		/// <param name="parentId">The id of the parent object to update.</param>
 		/// <param name="field">The array field.</param>
 		/// <param name="values">The values to append.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -357,7 +357,7 @@ namespace StackMob
 		/// <param name="parentId">The id of the parent object to update.</param>
 		/// <param name="field">The array field.</param>
 		/// <param name="values">The values to append.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <para>
@@ -373,6 +373,18 @@ namespace StackMob
 			AppendCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Gets all objects of the given <paramref name="type"/>.
+		/// </summary>
+		/// <param name="type">The parentType name (schema) to retrieve.</param>
+		/// <param name="success">A callback on success, providing an enumerable of stored objects.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/> is an empty string.
+		/// </exception>
 		public void Get (string type, Action<IEnumerable<IDictionary<string, object>>> success, Action<Exception> failure)
 		{
 			Get<IDictionary<string, object>> (type, success, failure);
@@ -383,7 +395,7 @@ namespace StackMob
 		/// </summary>
 		/// <typeparam name="T">The parentType of object to retrieve.</typeparam>
 		/// <param name="type">The parentType name (schema) to retrieve.</param>
-		/// <param name="success">A callback on success, returning a list of objects.</param>
+		/// <param name="success">A callback on success, providing an enumerable of stored objects.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <paramref name="type" />, <paramref name="success"/>, or <paramref name="failure"/> are <c>null</c>.
@@ -411,7 +423,7 @@ namespace StackMob
 		/// <typeparam name="T">The parentType of object to retrieve.</typeparam>
 		/// <param name="type">The parentType name (schema) of the object to retrieve.</param>
 		/// <param name="id">The id of the object to retrieve.</param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing the stored object.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <paramref name="type" />, <paramref name="id"/>, <paramref name="success"/>,
@@ -441,7 +453,7 @@ namespace StackMob
 		/// <typeparam name="T">The parentType of object to retrieve.</typeparam>
 		/// <param name="type">The parentType name (schema) of the object to retrieve.</param>
 		/// <param name="filters">Filters </param>
-		/// <param name="success">A callback on success, returning the stored object.</param>
+		/// <param name="success">A callback on success, providing an enumerable of objects.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
 		/// <paramref name="type" />, <paramref name="filters"/>, <paramref name="success"/>,
@@ -466,7 +478,21 @@ namespace StackMob
 				failure);
 		}
 
-		public void Get (string type, IDictionary<string, string> filters, Action<IEnumerable<IDictionary<string, object>>> success, Action<Exception> failure)
+		/// <summary>
+		/// Gets objects with the given <paramref name="filters"/>.
+		/// </summary>
+		/// <param name="type">The parentType name (schema) of the object to retrieve.</param>
+		/// <param name="filters">Filters </param>
+		/// <param name="success">A callback on success, providing an enumerable of stored objects.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="type" />, <paramref name="filters"/>, <paramref name="success"/>,
+		/// or <paramref name="failure"/> are <c>null</c>.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/> is an empty string.
+		/// </exception>
+		public void Get (string type, IEnumerable<KeyValuePair<string, string>> filters, Action<IEnumerable<IDictionary<string, object>>> success, Action<Exception> failure)
 		{
 			Get<IDictionary<string, object>> (type, filters, success, failure);
 		}
@@ -631,10 +657,23 @@ namespace StackMob
 			DeleteFromCore (parentType, parentId, field, values, success, failure);
 		}
 
+		/// <summary>
+		/// Creates a new user linked with a Facebook account.
+		/// </summary>
+		/// <param name="username">The username for the new user.</param>
+		/// <param name="facebookAccessToken">The Facebook access token.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="username"/>, <paramref name="facebookAccessToken"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
+		/// <exception cref="ArgumentException"><paramref name="username"/> or <paramref name="facebookAccessToken"/> are empty strings.</exception>
 		public void CreateUserWithFacebook (string username, string facebookAccessToken, Action success, Action<Exception> failure)
 		{
 			CheckArgument (username, "username");
 			CheckArgument (facebookAccessToken, "facebookAccessToken");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
 
 			var args = new Dictionary<string, string>();
 			args["username"] = username;
@@ -646,6 +685,14 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Logs in with a Facebook account.
+		/// </summary>
+		/// <param name="facebookAccessToken">The Facebook access token.</param>
+		/// <param name="success">A callback on success, providing the user information.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="facebookAccessToken"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
+		/// <exception cref="ArgumentException"><paramref name="facebookAccessToken"/> is an empty string.</exception>
 		public void LoginWithFacebook (string facebookAccessToken, ThirdPartyLoginSuccess success, Action<Exception> failure)
 		{
 			CheckArgument (facebookAccessToken, "facebookAccessToken");
@@ -668,6 +715,14 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Links the currently logged in user to a Facebook account.
+		/// </summary>
+		/// <param name="facebookAccessToken">The Facebook access token.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="facebookAccessToken"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
+		/// <exception cref="ArgumentException"><paramref name="facebookAccessToken"/> is an empty string.</exception>
 		public void LinkAccountToFacebook (string facebookAccessToken, Action success, Action<Exception> failure)
 		{
 			CheckArgument (facebookAccessToken, "facebookAccessToken");
@@ -685,6 +740,12 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Gets the user's Facebook information.
+		/// </summary>
+		/// <param name="success">A callback on success, providing the user information.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
 		public void GetFacebookUserInfo (Action<IDictionary<string, object>> success, Action<Exception> failure)
 		{
 			if (success == null)
@@ -698,6 +759,14 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Posts a message to Facebook.
+		/// </summary>
+		/// <param name="message">The message to post.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="message"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
+		/// <exception cref="ArgumentException"><paramref name="message"/> is an empty string.</exception>
 		public void PostToFacebook (string message, Action success, Action<Exception> failure)
 		{
 			CheckArgument (message, "message");
@@ -715,6 +784,17 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Creates a new user associated with a Twitter account.
+		/// </summary>
+		/// <param name="username">The username of the user to create.</param>
+		/// <param name="twitterToken">The Twitter access token.</param>
+		/// <param name="twitterSecret">The Twitter access secret.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="username"/>, <paramref name="twitterToken"/>, <paramref name="twitterSecret"/>,
+		/// <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c> </exception>
+		/// <exception cref="ArgumentException"><paramref name="username"/>, <paramref name="twitterToken"/> or <paramref name="twitterSecret"/> are empty strings.</exception>
 		public void CreateUserWithTwitter (string username, string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
 		{
 			CheckArgument (username, "username");
@@ -736,6 +816,15 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Logs in with a Twitter account.
+		/// </summary>
+		/// <param name="twitterToken">The Twitter access token.</param>
+		/// <param name="twitterSecret">The Twitter access secret.</param>
+		/// <param name="success">A callback on success, providing the user's information.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="twitterToken"/>, <paramref name="twitterSecret"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c> </exception>
+		/// <exception cref="ArgumentException"><paramref name="twitterToken"/> or <paramref name="twitterSecret"/> are empty strings.</exception>
 		public void LoginWithTwitter (string twitterToken, string twitterSecret, ThirdPartyLoginSuccess success, Action<Exception> failure)
 		{
 			CheckArgument (twitterToken, "twitterToken");
@@ -760,7 +849,15 @@ namespace StackMob
 				failure);
 		}
 
-		/// <remarks>Requires being logged to a StackMob account.</remarks>
+		/// <summary>
+		/// Links an existing account to a Twitter account.
+		/// </summary>
+		/// <param name="twitterToken">The Twitter access token.</param>
+		/// <param name="twitterSecret">The Twitter access secret.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="twitterToken"/>, <paramref name="twitterSecret"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c> </exception>
+		/// <exception cref="ArgumentException"><paramref name="twitterToken"/> or <paramref name="twitterSecret"/> are empty strings.</exception>
 		public void LinkAccountToTwitter (string twitterToken, string twitterSecret, Action success, Action<Exception> failure)
 		{
 			CheckArgument (twitterToken, "twitterToken");
@@ -780,6 +877,12 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Gets the logged in user's Twitter information.
+		/// </summary>
+		/// <param name="success">A callback on success, providing the user's information.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="success"/> or <paramref name="failure"/> is <c>null.</c> </exception>
 		public void GetTwitterUserInfo (Action<IDictionary<string, object>> success, Action<Exception> failure)
 		{
 			if (success == null)
@@ -793,6 +896,14 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Posts a message to Twitter.
+		/// </summary>
+		/// <param name="contents">The message to post to twitter.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="contents"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c> </exception>
+		/// <exception cref="ArgumentException"><paramref name="contents"/> is an empty string.</exception>
 		public void PostToTwitter (string contents, Action success, Action<Exception> failure)
 		{
 			CheckArgument (contents, "contents");
@@ -806,6 +917,13 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Logs in the user with the given <paramref name="arguments"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments to login with.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="arguments"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c> </exception>
 		public void Login (IDictionary<string, string> arguments, Action success, Action<Exception> failure)
 		{
 		    if (arguments == null)
@@ -832,6 +950,14 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Sends a forgotten password email to the user.
+		/// </summary>
+		/// <param name="username">The username to send the email for.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="username"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
+		/// <exception cref="ArgumentException"><paramref name="username"/> is an empty string.</exception>
 		public void ForgotPassword (string username, Action success, Action<Exception> failure)
 		{
 			CheckArgument (username, "username");
@@ -849,6 +975,12 @@ namespace StackMob
 				failure);
 		}
 
+		/// <summary>
+		/// Logs out the current user.
+		/// </summary>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
 		public void Logout (Action success, Action<Exception> failure)
 		{
 			if (success == null)
@@ -871,11 +1003,26 @@ namespace StackMob
 			this.cookieJar = new CookieContainer();
 		}
 
+		/// <summary>
+		/// Sends a push notification with the supplied <paramref name="payload"/>.
+		/// </summary>
+		/// <param name="payload">The payload to send with the notification.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="payload"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
 		public void Push (PushPayload payload, Action success, Action<Exception> failure)
 		{
 			Push (payload, new Dictionary<string, object>(), success, failure);
 		}
 
+		/// <summary>
+		/// Sends a push notification with the supplied <paramref name="payload"/> to specific user <paramref name="ids"/>.
+		/// </summary>
+		/// <param name="payload">The payload to send with the notification.</param>
+		/// <param name="ids">The user IDs to send the notification to.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="payload"/>, <paramref name="ids"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
 		public void Push (PushPayload payload, IEnumerable<string> ids, Action success, Action<Exception> failure)
 		{
 			if (ids == null)
@@ -887,6 +1034,14 @@ namespace StackMob
 			Push (payload, values, success, failure);
 		}
 
+		/// <summary>
+		/// Sends a push notification with the supplied <paramref name="payload"/> to specific <paramref name="tokens"/>.
+		/// </summary>
+		/// <param name="payload">The payload to send with the notification.</param>
+		/// <param name="tokens">The push notification tokens to send to.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="payload"/>, <paramref name="tokens"/>, <paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
 		public void Push (PushPayload payload, IEnumerable<PushToken> tokens, Action success, Action<Exception> failure)
 		{
 			if (tokens == null)
