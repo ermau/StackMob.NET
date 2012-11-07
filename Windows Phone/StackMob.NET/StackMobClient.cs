@@ -230,6 +230,50 @@ namespace StackMob
 		}
 
 		/// <summary>
+		/// Increments a <paramref name="field"/> by one on an object.
+		/// </summary>
+		/// <param name="type">The parentType (schema) of object to update.</param>
+		/// <param name="id">The id of the object to update.</param>
+		/// <param name="field">The field to increment.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="type" />, <paramref name="id"/>, <paramref name="field"/>,
+		/// <paramref name="success"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/>, <paramref name="id"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void Increment (string type, string id, string field, Action success, Action<Exception> failure)
+		{
+			AdjustCore (type, id, field, 1, success, failure);
+		}
+
+		/// <summary>
+		/// Decrements a <paramref name="field"/> by one on an object.
+		/// </summary>
+		/// <param name="type">The parentType (schema) of object to update.</param>
+		/// <param name="id">The id of the object to update.</param>
+		/// <param name="field">The field to increment.</param>
+		/// <param name="success">A callback on success.</param>
+		/// <param name="failure">A callback on failure, giving the exception.</param>
+		/// <exception cref="ArgumentNullException">
+		/// <para>
+		/// <paramref name="type" />, <paramref name="id"/>, <paramref name="field"/>,
+		/// <paramref name="success"/> or <paramref name="failure"/> are <c>null</c>
+		/// </para>
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// <paramref name="type"/>, <paramref name="id"/> or <paramref name="field"/> are empty strings.
+		/// </exception>
+		public void Decrement (string type, string id, string field, Action success, Action<Exception> failure)
+		{
+			AdjustCore (type, id, field, -1, success, failure);
+		}
+
+		/// <summary>
 		/// Appends <paramref name="values"/> to an array <paramref name="field"/> of an existing object.
 		/// </summary>
 		/// <typeparam name="T">The parentType of object to update.</typeparam>
@@ -1121,6 +1165,26 @@ namespace StackMob
 			{
 				success (this.apis);
 			}
+		}
+
+		private void AdjustCore (string type, string id, string field, int value, Action success, Action<Exception> failure)
+		{
+			CheckArgument (type, "type");
+			CheckArgument (id, "id");
+			CheckArgument (field, "field");
+			if (success == null)
+				throw new ArgumentNullException ("success");
+			if (failure == null)
+				throw new ArgumentNullException ("failure");
+
+			var req = GetRequest (type, "PUT", id: id);
+
+			var dict = new Dictionary<string, object> { { field + "[inc]", value } };
+
+			Execute (req,
+				s => JsonSerializer.SerializeToStream (dict, s),
+				s => success(),
+				failure);
 		}
 
 		private void Push (PushPayload payload, IDictionary<string, object> target, Action success, Action<Exception> failure)
