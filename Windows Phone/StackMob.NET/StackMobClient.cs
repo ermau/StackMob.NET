@@ -452,7 +452,7 @@ namespace StackMob
 		/// </summary>
 		/// <typeparam name="T">The parentType of object to retrieve.</typeparam>
 		/// <param name="type">The parentType name (schema) of the object to retrieve.</param>
-		/// <param name="filters">Filters </param>
+		/// <param name="filters">Filters to apply to the query.</param>
 		/// <param name="success">A callback on success, providing an enumerable of objects.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
@@ -462,7 +462,7 @@ namespace StackMob
 		/// <exception cref="ArgumentException">
 		/// <paramref name="type"/> is an empty string.
 		/// </exception>
-		public void Get<T> (string type, IEnumerable<KeyValuePair<string, string>> filters, Action<IEnumerable<T>> success, Action<Exception> failure)
+		public void Get<T> (string type, IEnumerable<string> filters, Action<IEnumerable<T>> success, Action<Exception> failure)
 		{
 			CheckArgument (type, "type");
 			if (filters == null)
@@ -472,7 +472,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (type, "GET", query: GetQueryForArguments (filters));
+			var req = GetRequest (type, "GET", query: GetQueryForFilters (filters));
 			Execute (req,
 				s => success (JsonSerializer.DeserializeFromStream<IEnumerable<T>> (s)),
 				failure);
@@ -482,7 +482,7 @@ namespace StackMob
 		/// Gets objects with the given <paramref name="filters"/>.
 		/// </summary>
 		/// <param name="type">The parentType name (schema) of the object to retrieve.</param>
-		/// <param name="filters">Filters </param>
+		/// <param name="filters">Filters to apply to the query.</param>
 		/// <param name="success">A callback on success, providing an enumerable of stored objects.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException">
@@ -1224,6 +1224,20 @@ namespace StackMob
 
 				success (primaryKey);
 			}, failure);
+		}
+
+		private string GetQueryForFilters (IEnumerable<string> filters)
+		{
+			StringBuilder builder = new StringBuilder();
+			foreach (string filter in filters)
+			{
+				if (builder.Length > 0)
+					builder.Append ("&");
+
+				builder.Append (Uri.EscapeDataString (filter));
+			}
+
+			return builder.ToString();
 		}
 
 		private string GetQueryForArguments (IEnumerable<KeyValuePair<string, string>> arguments)
