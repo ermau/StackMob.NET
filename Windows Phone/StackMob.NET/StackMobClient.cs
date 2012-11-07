@@ -1296,9 +1296,9 @@ namespace StackMob
 			}
 		}
 
-		private HttpWebRequest GetRequest (string resource, string method, string id = "", string query = "")
+		private HttpWebRequest GetRequest (string resource, string method, string id = "", string query = "", string select = "")
 		{
-			return GetRequest ("api", resource, method, id, query);
+			return GetRequest ("api", resource, method, id, query, select);
 		}
 
 		private HttpWebRequest GetPushRequest (string resource, string method, string id = "", string query = "")
@@ -1306,7 +1306,7 @@ namespace StackMob
 			return GetRequest ("push", resource, method, id, query);
 		}
 
-		private HttpWebRequest GetRequest (string subdomain, string resource, string method, string id = "", string query = "")
+		private HttpWebRequest GetRequest (string subdomain, string resource, string method, string id = "", string query = "", string select = "")
 		{
 			string url = "https://" + subdomain + ".mob1.stackmob.com/" + resource;
 			if (!String.IsNullOrWhiteSpace (id))
@@ -1319,6 +1319,9 @@ namespace StackMob
 			request.CookieContainer = this.cookieJar;
 			request.Method = method;
 			request.Accept = this.accepts;
+
+			if (!String.IsNullOrWhiteSpace (select))
+				request.Headers["X-StackMob-Select"] = select;
 
 			request.SignRequest (new Tokens
 			{
