@@ -28,26 +28,109 @@ namespace StackMob
 {
 	public delegate void ThirdPartyLoginSuccess (string username, IDictionary<string, object> thirdPartyInfo);
 
+	public enum OAuthVersion
+	{
+		/// <summary>
+		/// OAuth 1
+		/// </summary>
+		One = 1,
+
+		/// <summary>
+		/// OAuth 2
+		/// </summary>
+		Two = 2
+	}
+
 	/// <summary>
 	/// A class providing a client interface to the StackMob.com APIs.
 	/// </summary>
 	public partial class StackMobClient
 	{
-		public StackMobClient (string apiKey, string apiSecret, string appname, int apiVersion, string userObjectName = "user")
+		/// <summary>
+		/// Creates and initializes a new instance of the <see cref="StackMobClient"/> class;
+		/// </summary>
+		/// <param name="apiVersion">The version of your API to use.</param>
+		/// <param name="apiKey">Your StackMob API key.</param>
+		/// <exception cref="ArgumentException">
+		/// <para><paramref name="apiVersion"/> is &lt; 0.</para>
+		/// <para>-- or --</para>
+		/// <para><paramref name="apiKey"/> is an empty <c>string</c>.</para>
+		/// </exception>
+		/// <exception cref="ArgumentNullException"><paramref name="apiKey"/> is <c>null.</c></exception>
+		public StackMobClient (int apiVersion, string apiKey)
 		{
-			if (apiKey == null)
-				throw new ArgumentNullException ("apiKey");
-			if (apiSecret == null)
-				throw new ArgumentNullException ("apiSecret");
 			if (apiVersion < 0)
 				throw new ArgumentException ("API Version must be 0 or greater", "apiVersion");
+			CheckArgument (apiKey, "apiKey");
 
 			this.apiKey = apiKey;
-			this.apiSecret = apiSecret;
-			this.userObjectName = userObjectName;
-			this.appname = appname;
-
 			this.accepts = "application/vnd.stackmob+json; version=" + apiVersion;
+		}
+
+		/// <summary>
+		/// Creates and initializes a new instance of the <see cref="StackMobClient"/> class;
+		/// </summary>
+		/// <param name="oauth">The version of OAuth to use.</param>
+		/// <param name="apiVersion">The version of your API to use.</param>
+		/// <param name="apiKey">Your StackMob API key.</param>
+		/// <param name="apiSecret">Your StackMob API secret.</param>
+		/// <exception cref="ArgumentException">
+		/// <para><paramref name="apiVersion"/> is &lt; 0.</para>
+		/// <para>-- or --</para>
+		/// <para><paramref name="apiKey"/> or <paramref name="apiSecret"/> are empty <c>strings</c>.</para>
+		/// <para>-- or --</para>
+		/// <para><paramref name="oauth"/> is not a valid member of <see cref="OAuthVersion"/>.</para>
+		/// </exception>
+		/// <exception cref="ArgumentNullException"><paramref name="apiKey"/> or <paramref name="apiSecret"/> is <c>null.</c></exception>
+		public StackMobClient (OAuthVersion oauth, int apiVersion, string apiKey, string apiSecret)
+			: this (apiVersion, apiKey)
+		{
+			if (!Enum.IsDefined (typeof(OAuthVersion), oauth))
+				throw new ArgumentOutOfRangeException ("oauth");
+			
+			CheckArgument (apiSecret, "apiSecret");
+
+			this.oauthv = oauth;
+			this.apiSecret = apiSecret;
+			this.apiKey = apiKey;
+		}
+
+		/// <summary>
+		/// Creates and initializes a new instance of the <see cref="StackMobClient"/> class;
+		/// </summary>
+		/// <param name="oauth">The version of OAuth to use.</param>
+		/// <param name="apiVersion">The version of your API to use.</param>
+		/// <param name="apiKey">Your StackMob API key.</param>
+		/// <param name="apiSecret">Your StackMob API secret.</param>
+		/// <param name="apiHost">The host (stackmob.com) to use to access the API.</param>
+		/// <param name="userSchema">The name of the user schema.</param>
+		/// <param name="usernameField">The name of the username field.</param>
+		/// <param name="passwordField">The name of the user password field.</param>
+		/// <exception cref="ArgumentException">
+		/// <para><paramref name="apiVersion"/> is &lt; 0.</para>
+		/// <para>-- or --</para>
+		/// <para><paramref name="apiKey"/>, <paramref name="apiSecret"/>, <paramref name="apiHost"/>, <paramref name="userSchema"/>
+		/// <paramref name="usernameField"/> or <paramref name="passwordField"/> are empty <c>strings</c>.</para>
+		/// <para>-- or --</para>
+		/// <para><paramref name="oauth"/> is not a valid member of <see cref="OAuthVersion"/>.</para>
+		/// </exception>
+		/// <exception cref="ArgumentNullException">
+		/// <paramref name="apiKey"/>, <paramref name="apiSecret"/>, <paramref name="apiHost"/>, <paramref name="userSchema"/>,
+		/// <paramref name="usernameField"/> or <paramref name="passwordField"/> is <c>null.</c>
+		/// </exception>
+		public StackMobClient (OAuthVersion oauth, int apiVersion, string apiKey, string apiSecret, string apiHost, string userSchema, string usernameField, string passwordField)
+			: this (oauth, apiVersion, apiKey, apiSecret)
+		{
+			CheckArgument (apiHost, "apiHost");
+			CheckArgument (userSchema, "userSchema");
+			CheckArgument (usernameField, "usernameField");
+			CheckArgument (passwordField, "passwordField");
+
+			this.oauthv = oauth;
+			this.apiKey = apiKey;
+			this.apiHost = apiHost;
+			this.userSchema = userSchema;
+			this.usernameField = usernameField;
 		}
 
 		/// <summary>
@@ -757,7 +840,7 @@ namespace StackMob
 			args["username"] = username;
 			args["fb_at"] = facebookAccessToken;
 
-			var req = GetRequest (this.userObjectName + "/createUserWithFacebook", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/createUserWithFacebook", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -782,7 +865,7 @@ namespace StackMob
 			var args = new Dictionary<string, string>();
 			args["fb_at"] = facebookAccessToken;
 
-			var req = GetRequest (this.userObjectName + "/facebookLogin", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/facebookLogin", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s =>
 				{
@@ -812,7 +895,7 @@ namespace StackMob
 			var args = new Dictionary<string, string>();
 			args ["fb_at"] = facebookAccessToken;
 
-			var req = GetRequest (this.userObjectName + "/linkUserWithFacebook", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/linkUserWithFacebook", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -831,7 +914,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (this.userObjectName + "/getFacebookUserInfo", "GET");
+			var req = GetRequest (this.userSchema + "/getFacebookUserInfo", "GET");
 			Execute (req,
 				s => success (JsonSerializer.DeserializeFromStream<IDictionary<string, object>> (s)),
 				failure);
@@ -856,7 +939,7 @@ namespace StackMob
 			var args = new Dictionary<string, string>();
 			args["message"] = message;
 
-			var req = GetRequest (this.userObjectName + "/postFacebookMessage", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/postFacebookMessage", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -888,7 +971,7 @@ namespace StackMob
 			args["tw_ts"] = twitterSecret;
 			args["username"] = username;
 
-			var req = GetRequest (this.userObjectName + "/createuserWithTwitter", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/createuserWithTwitter", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -916,7 +999,7 @@ namespace StackMob
 			args["tw_tk"] = twitterToken;
 			args["tw_ts"] = twitterSecret;
 
-			var req = GetRequest (this.userObjectName + "/twitterLogin", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/twitterLogin", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s =>
 				{
@@ -949,7 +1032,7 @@ namespace StackMob
 			args["tw_tk"] = twitterToken;
 			args["tw_ts"] = twitterSecret;
 
-			var req = GetRequest (this.userObjectName + "/linkUserWithTwitter", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/linkUserWithTwitter", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -968,7 +1051,7 @@ namespace StackMob
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
 
-			var req = GetRequest (this.userObjectName + "/getTwitterUserInfo", "GET");
+			var req = GetRequest (this.userSchema + "/getTwitterUserInfo", "GET");
 			Execute (req,
 				s => success (JsonSerializer.DeserializeFromStream<IDictionary<string, object>> (s)),
 				failure);
@@ -989,7 +1072,7 @@ namespace StackMob
 			var args = new Dictionary<string, string>();
 			args ["tw_st"] = contents;
 
-			var req = GetRequest (this.userObjectName + "/twitterStatusUpdate", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/twitterStatusUpdate", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -1013,12 +1096,12 @@ namespace StackMob
 
 			this.loginUsername = null;
 
-			GetPrimaryKey (this.userObjectName,
+			GetPrimaryKey (this.userSchema,
 				key =>
 				{
 					this.usernameField = key;
 					
-					var req = GetRequest (this.userObjectName + "/login", "GET", query: GetQueryForArguments (arguments));
+					var req = GetRequest (this.userSchema + "/login", "GET", query: GetQueryForArguments (arguments));
 					Execute (req,
 						s =>
 						{
@@ -1051,7 +1134,7 @@ namespace StackMob
 			var args = new Dictionary<string, string>();
 			args ["username"] = username;
 
-			var req = GetRequest (this.userObjectName + "/forgotPassword", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/forgotPassword", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -1063,21 +1146,25 @@ namespace StackMob
 		/// <param name="success">A callback on success.</param>
 		/// <param name="failure">A callback on failure, giving the exception.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="success"/> or <paramref name="failure"/> is <c>null.</c></exception>
+		/// <remarks>If you've not previously logged in, <paramref name="success"/> will be called.</remarks>
 		public void Logout (Action success, Action<Exception> failure)
 		{
 			if (success == null)
 				throw new ArgumentNullException ("success");
 			if (failure == null)
 				throw new ArgumentNullException ("failure");
-			if (this.usernameField == null)
-				throw new InvalidOperationException ("Have not previously logged in");
+			if (this.loginUsername == null)
+			{
+				success();
+				return;
+			}
 
 			var args = new Dictionary<string, string>();
 			args[this.usernameField] = this.loginUsername;
 			this.loginUsername = null;
 			this.loginTime = default(DateTime);
 
-			var req = GetRequest (this.userObjectName + "/logout", "GET", query: GetQueryForArguments (args));
+			var req = GetRequest (this.userSchema + "/logout", "GET", query: GetQueryForArguments (args));
 			Execute (req,
 				s => success(),
 				failure);
@@ -1136,7 +1223,6 @@ namespace StackMob
 		}
 
 		private DateTime loginTime;
-		private string usernameField;
 		private string loginUsername;
 
 		private CookieContainer cookieJar = new CookieContainer();
@@ -1144,10 +1230,13 @@ namespace StackMob
 
 		private readonly string apiKey;
 		private readonly string apiSecret;
-		private readonly string userObjectName;
-		private readonly string appname;
+		private readonly string apiHost = "stackmob.com";
+		private readonly string userSchema = "user";
+		private string usernameField;
 
 		private JsonObject apis;
+		private readonly OAuthVersion oauthv = OAuthVersion.Two;
+
 		private void GetApis (Action<JsonObject> success, Action<Exception> failure)
 		{
 			if (this.apis == null)
@@ -1304,6 +1393,9 @@ namespace StackMob
 
 		private void GetPrimaryKey (string type, string field, Action<string> success, Action<Exception> failure)
 		{
+			if (this.usernameField != null)
+				success (this.usernameField);
+
 			GetApis (apis =>
 			{
 				if (!apis.ContainsKey (type))
@@ -1434,7 +1526,7 @@ namespace StackMob
 
 		private HttpWebRequest GetRequest (string subdomain, string resource, string method, string id = "", string query = "", string select = "")
 		{
-			string url = "https://" + subdomain + ".mob1.stackmob.com/" + resource;
+			string url = "https://" + subdomain + "." + this.apiHost + "/" + resource;
 			if (!String.IsNullOrWhiteSpace (id))
 				url += "/" + id;
 
