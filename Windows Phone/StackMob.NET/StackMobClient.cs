@@ -1115,6 +1115,44 @@ namespace StackMob
 				failure);
 		}
 
+		private static Action<Exception> PassThroughFailure (Action<Exception> failure)
+		{
+			return ex =>
+			{
+				if (!(ex is WebException))
+				{
+					failure (ex);
+					return;
+				}
+
+				try
+				{
+					var wex = ((WebException)ex);
+					Stream stream = wex.Response.GetResponseStream();
+					JsonObject obj = JsonSerializer.DeserializeFromStream<JsonObject> (stream);
+
+					failure (new WebException (ex.Message, new Exception (GetStringForJson (obj)), wex.Status, wex.Response));
+				}
+				catch (Exception)
+				{
+					failure (ex);
+				}
+			};
+		}
+
+		private static string GetStringForJson (JsonObject obj)
+		{
+			StringBuilder messageBuilder = new StringBuilder();
+			foreach (var kvp in obj)
+			{
+				messageBuilder.Append (kvp.Key);
+				messageBuilder.Append (": ");
+				messageBuilder.AppendLine (kvp.Value);
+			}
+
+			return messageBuilder.ToString();
+		}
+
 		/// <summary>
 		/// Sends a forgotten password email to the user.
 		/// </summary>
