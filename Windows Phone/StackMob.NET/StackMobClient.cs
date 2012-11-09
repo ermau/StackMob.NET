@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using ServiceStack.Text;
 using SimpleOAuth;
@@ -1101,15 +1102,49 @@ namespace StackMob
 				{
 					this.usernameField = key;
 					
-					var req = GetRequest (this.userSchema + "/login", "GET", query: GetQueryForArguments (arguments));
-					Execute (req,
-						s =>
-						{
-							this.loginUsername = arguments [key];
-							this.loginTime = DateTime.Now;
-							success();
-						},
-						failure);
+					if (this.oauthv == OAuthVersion.One)
+					{
+						var req = GetRequest (this.userSchema + "/login", "GET", query: GetQueryForArguments (arguments));
+						Execute (req,
+									s =>
+									{
+										this.loginUsername = arguments[this.usernameField];
+										this.loginTime = DateTime.Now;
+										success();
+									},
+									failure);
+					}
+					else if (this.oauthv == OAuthVersion.Two)
+					{
+						arguments.Add ("token_type", "mac");
+						arguments.Add ("mac_algorithm", "hmac-sha-1");
+
+						var req = GetRequest (this.userSchema + "/accessToken", "POST", query: GetQueryForArguments (arguments));
+						req.ContentType = "application/x-www-form-urlencoded";
+						Execute (req,
+									s =>
+									{
+										try
+										{
+											JsonObject obj = JsonSerializer.DeserializeFromStream<JsonObject> (s);
+											this.oauth2Token = obj["access_token"];
+											this.oauth2MacKey = obj["mac_key"];
+											this.oauth2TokenExpiration =
+												new DateTimeOffset (DateTime.UtcNow + TimeSpan.FromSeconds (int.Parse (obj["expires_in"])));
+											this.oauth2RefreshToken = obj["refresh_token"];
+
+											JsonObject user = JsonObject.Parse (JsonObject.Parse (obj["stackmob"])["user"]);
+											this.loginUsername = user[this.usernameField];
+											this.loginTime = DateTime.Now;
+											success();
+										}
+										catch (Exception ex)
+										{
+											failure (ex);
+										}
+									},
+									PassThroughFailure (failure));
+					}
 				},
 
 				failure);
@@ -1260,6 +1295,12 @@ namespace StackMob
 			Push (payload, values, success, failure);
 		}
 
+		private readonly OAuthVersion oauthv = OAuthVersion.Two;
+		private string oauth2Token;
+		private string oauth2MacKey;
+		private string oauth2RefreshToken;
+		private DateTimeOffset oauth2TokenExpiration;
+
 		private DateTime loginTime;
 		private string loginUsername;
 
@@ -1273,7 +1314,11 @@ namespace StackMob
 		private string usernameField;
 
 		private JsonObject apis;
-		private readonly OAuthVersion oauthv = OAuthVersion.Two;
+
+		private bool IsOAuth2TokenValid
+		{
+			get { return (this.oauth2TokenExpiration != default(DateTimeOffset) && this.oauth2TokenExpiration > DateTimeOffset.UtcNow); }
+		}
 
 		private void GetApis (Action<JsonObject> success, Action<Exception> failure)
 		{
@@ -1575,17 +1620,76 @@ namespace StackMob
 			request.CookieContainer = this.cookieJar;
 			request.Method = method;
 			request.Accept = this.accepts;
+			request.UserAgent = "StackMob.NET";
 
 			if (!String.IsNullOrWhiteSpace (select))
 				request.Headers["X-StackMob-Select"] = select;
 
-			request.SignRequest (new Tokens
+			if (this.oauthv == OAuthVersion.One)
 			{
-				ConsumerKey = this.apiKey,
-				ConsumerSecret = this.apiSecret
-			}).InHeader();
+				request.SignRequest (new Tokens
+				{
+					ConsumerKey = this.apiKey,
+					ConsumerSecret = this.apiSecret
+				}).InHeader();
+			}
+			else if (this.oauthv == OAuthVersion.Two)
+			{
+				request.Headers["X-StackMob-API-Key"] = this.apiKey;
+				if (IsOAuth2TokenValid)
+				{
+					string urlNoScheme = url.Substring ("https".Length + 3);
+					int firstSlash = urlNoScheme.IndexOf ('/');
+					string[] hostAndPort = urlNoScheme.Substring (0, firstSlash).Split (':');
+					string host = hostAndPort[0];
+					string port = hostAndPort.Length > 1 ? hostAndPort[1] : "443";
+					string uri = urlNoScheme.Substring (firstSlash);
+
+					request.Headers["Authorization"] = GetMacToken (method, uri, host, port);
+				}
+			}
 
 			return request;
+		}
+
+		private string GetMacToken (string method, string uri, string host, string port)
+		{
+			string ts = GetTime();
+			string nonce = String.Format ("n{0:D}", (long)Math.Round ((double)new Random().Next() * 10000));
+			string baseString = GetNormalizedRequestString (ts, nonce, method, uri, host, port);
+
+			HMACSHA1 hmac = new HMACSHA1 (Encoding.Unicode.GetBytes (this.oauth2MacKey));
+			hmac.Initialize();
+
+			byte[] rawMacBytes = hmac.ComputeHash (Encoding.Unicode.GetBytes (baseString));
+			string calculatedMac = Convert.ToBase64String (rawMacBytes);
+
+			return String.Format ("MAC id=\"{0}\",ts=\"{1}\",nonce=\"{2}\",mac=\"{3}\"", oauth2Token, ts, nonce, calculatedMac);
+		}
+
+		private string GetNormalizedRequestString (string timestamp, string nonce, string method, string uri, string host, string port)
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.Append (timestamp);
+			builder.Append ("\n");
+			builder.Append (nonce);
+			builder.Append ("\n");
+			builder.Append (method);
+			builder.Append ("\n");
+			builder.Append (uri);
+			builder.Append ("\n");
+			builder.Append (host);
+			builder.Append ("\n");
+			builder.Append (port);
+			builder.Append ("\n\n");
+
+			return builder.ToString();
+		}
+
+		private readonly DateTime epoch = new DateTime (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		private string GetTime()
+		{
+			return ((int)DateTime.UtcNow.Subtract (epoch).TotalSeconds).ToString ("D");
 		}
 	}
 }
